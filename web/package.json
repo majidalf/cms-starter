@@ -20,6 +20,7 @@
     "@sanity/client": "^8.6.1",
     "@sanity/image-url": "^2.1.1",
     "@sanity/webhook": "^4.0.4",
+    "groq": "^6.17.0",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8"

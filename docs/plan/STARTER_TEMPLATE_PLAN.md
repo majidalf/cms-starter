@@ -137,7 +137,7 @@ Catat versi template yang dipakai (tag atau commit hash `cms-starter`) di `READM
 
 | Object | Field | Asal |
 |---|---|---|
-| `seo` | metaTitle, metaDescription, keywords, canonicalUrl, ogImage, `noIndex` (baru). Field teks dalam versi id/en | majidalf.com |
+| `seo` | metaTitle, metaDescription, canonicalUrl, ogImage, `noIndex` (baru). Field teks dalam versi id/en. `keywords` dihapus (tidak dipakai mesin pencari) | majidalf.com |
 | `link` | text, href, `isExternal` (baru) | majidalf.com |
 | `socialLink` | platform, url | majidalf.com |
 | `blockContent` | Portable Text + image + link annotation | majidalf.com |
@@ -184,7 +184,8 @@ Setiap project dari template **selalu** dua bahasa: Indonesia (`id`, default) da
 
 **URL**
 - Semua halaman berada di bawah prefix bahasa: `/id/...` dan `/en/...`.
-- `/` di-redirect ke `/id` lewat `proxy.ts` Next 16 (dulu bernama `middleware.ts`). Cek nama file dan API-nya di `node_modules/next/dist/docs/`, sesuai `AGENTS.md`.
+- `/` di-redirect ke `/id` lewat `redirects()` di `next.config.ts` (307, tidak permanen). `proxy.ts` tidak dipakai karena redirect statis sudah cukup. Prefix lain yang tidak valid menghasilkan 404 lewat `isLocale()` di layout.
+- **Jangan pakai `dynamicParams = false` di layout `[locale]`.** Setting itu ikut memblokir route anak yang belum di-prerender, sehingga halaman yang baru di-publish akan 404 sampai build berikutnya. Bug ini ditemukan dan diperbaiki saat T2a.
 - Segmen route sama di kedua bahasa (`/id/services/...` dan `/en/services/...`); hanya slug konten yang berbeda per bahasa. Segmen route yang diterjemahkan (misalnya `/id/layanan`) sengaja tidak dibuat di versi awal karena menambah kerumitan routing. Kalau klien membutuhkannya, bisa ditambahkan lewat `lib/routes.ts`.
 - Tombol ganti bahasa di header membawa pengunjung ke halaman padanannya, bukan kembali ke Home.
 
@@ -193,7 +194,12 @@ Setiap project dari template **selalu** dua bahasa: Indonesia (`id`, default) da
 - Pendekatan ini dipilih daripada terjemahan per dokumen (`@sanity/document-internationalization`) supaya relasi antar dokumen tetap satu. Referensi `person` → `service` cukup dibuat sekali, tanpa perlu menautkan versi ID dan EN masing-masing. Gambar, tanggal, urutan, dan flag persetujuan juga tidak terduplikasi.
 - Hanya field teks yang diterjemahkan. Field seperti foto, tanggal, email, dan `clientConsent` hanya ada satu.
 - **Validasi:** kedua bahasa wajib diisi sebelum dokumen bisa di-publish. Tidak ada fallback diam-diam ke bahasa lain, supaya pengunjung tidak melihat halaman dengan bahasa campuran.
-- Query GROQ menerima parameter `$locale` dan mengambil field sesuai bahasa, misalnya `"title": title[$locale]`.
+  - Setiap tipe punya dua varian: `localeString` (opsional, tapi kalau satu bahasa diisi semua wajib) dan `requiredLocaleString` (wajib di semua bahasa). Sama untuk `localeText` dan `localeBlockContent`.
+  - **Aturan dipasang di field per-bahasa (`title.id`, `title.en`), bukan di object-nya.** Temuan T2a: aturan pada nilai bertipe object (termasuk `Rule.required()` bawaan dan `.error()` eksplisit) selalu dilaporkan sebagai *warning*, yang tidak memblokir publish. Aturan pada field primitif dilaporkan sebagai *error*. Diuji dengan `sanity documents validate`; perilaku tombol Publish di Studio dicek ulang secara manual di T6.
+  - Konsekuensinya, `Rule.required()` pada field object seperti gambar wajib (`imageTextSection.image`) atau tombol (`ctaSection.cta`) hanya menjadi warning. Renderer menangani nilai kosong tanpa error.
+- **Slug per bahasa berupa string, bukan tipe `slug` Sanity** (karena `slug` adalah object, lihat poin di atas). Validasinya: wajib, format `huruf-kecil-dengan-tanda-hubung`, dan unik per bahasa. Sebagai pengganti tombol "Generate", pesan error menampilkan saran slug yang dibuat dari judul di bahasa yang sama.
+- Query mengambil kedua bahasa, lalu komponen memilih satu bahasa lewat `localize(value, locale)` di `lib/sanity/localize.ts`. Ini menggantikan rencana awal `title[$locale]` di GROQ, karena tipe dari typegen jadi lebih tepat dan query lebih sederhana. Filter slug tetap di GROQ: `slug[$locale] == $slug`.
+- **Home page** dipilih lewat referensi `siteSettings.homePage`, bukan slug khusus `home`. Mengganti nama slug tidak akan memutus halaman utama.
 
 **Teks UI** (label tombol, menu statis, pesan form) disimpan di kamus `lib/i18n.ts`, bukan di Sanity. Teks yang perlu bisa diubah klien (menu, footer, disclaimer) tetap di Sanity sebagai field dwibahasa.
 
@@ -384,7 +390,7 @@ Sampai titik itu, perbaikan di template dicatat di `CHANGELOG.md` template, lalu
 |---|---|---|
 | **T0 — Keputusan** ✅ | Jawab D-1 s.d. D-8 (Section 11) | Selesai 2026-10-04 |
 | **T1 — Skeleton** ✅ | Buat repo, salin bagian Section 2.1, generalisasi Section 2.2, placeholder | Selesai 2026-10-04: build, typecheck, lint, format `web/` lulus; `sanity schema validate` + build `studio/` lulus. Penyimpangan: (1) `next` naik ke 16.3.8 karena `@opennextjs/cloudflare` 1.20.8 mensyaratkan `>=16.3.8`; (2) nama Worker di `wrangler.jsonc` memakai default valid `cms-starter`, bukan placeholder, karena `next build` memvalidasi file itu. Pembersihan `siteSettings`, singleton, dan typegen (Section 2.2) dikerjakan di T2a bersama content model |
-| **T2a — Content model dasar** | Objects (termasuk `locale*`) + `siteSettings` + `navigation` + `page` + section dasar, routing `/[locale]` + redirect `/`, structure singleton, typegen | `sanity schema validate` lulus; Home + 1 halaman generik ter-render dari Sanity di `/id` dan `/en`, lengkap dengan hreflang |
+| **T2a — Content model dasar** ✅ | Objects (termasuk `locale*`) + `siteSettings` + `navigation` + `page` + section dasar, routing `/[locale]` + redirect `/`, structure singleton, typegen | Selesai 2026-10-04. Sanity project dev `cms-starter-dev` (`wxyhn8wb`, dataset `production` public) dibuat dan diisi seed `studio/seed/sample.ndjson`. Terverifikasi lewat `next start`: `/id`, `/en`, `/id/tentang-kami`, `/en/about-us` 200 dengan `lang`, hreflang, canonical, dan satu `h1`; slug bahasa lain redirect ke slug yang benar; prefix asing 404; halaman yang di-publish setelah build langsung tampil. Validasi dua bahasa dan slug teruji sebagai error. Penyimpangan dari rencana dicatat di Section 4.4. Ditemukan dan diperbaiki: `useCdn: true` (data basi setelah publish) dan `dynamicParams = false` (halaman baru 404). **Untuk T3:** Sanity punya jeda indexing singkat setelah publish (request dalam ±1 detik masih melihat data lama), jadi uji apakah webhook revalidate perlu jeda sebelum me-render ulang. **Item terbuka untuk T3:** `notFound()` dari halaman di bawah `[locale]` mengembalikan status 404 yang benar, tetapi HTML server hanya berisi kerangka error Next; konten `[locale]/not-found.tsx` hanya ada di payload RSC dan dirender di browser. Kemungkinan terkait root layout di segment dinamis; coba `experimental.globalNotFound` (cek kompatibilitas OpenNext) dan verifikasi di browser. Review kode T2a (agent code-reviewer): tidak ada CRITICAL/HIGH; temuan MEDIUM/LOW sudah diperbaiki (canonical per bahasa, guard skema URL `safeHref`, `isHomePage` untuk link tanpa referensi, rich text kosong, `aria-label` logo, batas panjang slug, body webhook non-object) |
 | **T2b — Preset korporat** | Schema Section 4.3, `lib/routes.ts`, query + halaman list/detail, vCard, seed data korporat contoh (perusahaan fiktif) | Semua route preset 200 dengan seed data; filter `clientConsent`/`approvedForDisplay` teruji; checklist "hapus koleksi" sudah dicoba sekali (hapus `industry`, build tetap lulus) |
 | **T3 — Lapisan non-fungsional** | SEO helper, sitemap/robots, security headers, revalidate config | Header terlihat di response; sitemap valid; webhook teruji end-to-end |
 | **T4 — QA & CI** | Vitest, Playwright + axe, Lighthouse CI, workflow CI | Pipeline hijau di PR contoh; deploy otomatis dari `main` |

@@ -3,12 +3,14 @@
  * This map is the only thing a new project should need to edit - the webhook handler
  * in app/api/revalidate/route.ts stays generic.
  *
- * The Sanity webhook must send a projection like `{"_type": _type, "slug": slug.current}`.
+ * The Sanity webhook must send this projection:
+ *   {"_type": _type, "slugs": slug}
  */
+import type { Locale } from '@/lib/i18n';
 
 export interface RevalidatePayload {
   _type?: string;
-  slug?: string;
+  slugs?: Partial<Record<Locale, string | null>> | null;
 }
 
 export interface RevalidateTarget {
@@ -19,14 +21,15 @@ export interface RevalidateTarget {
 
 type Resolver = (payload: RevalidatePayload) => RevalidateTarget[];
 
-/** Revalidates the whole site - for documents that appear in the shared layout
- * (navigation, footer, site settings), and as the fallback for unmapped types. */
-const wholeSite: Resolver = () => [{ path: '/', type: 'layout' }];
+/** Revalidates every page in every language (the root layout lives at app/[locale]). */
+const wholeSite: Resolver = () => [{ path: '/[locale]', type: 'layout' }];
 
 export const revalidateMap: Record<string, Resolver> = {
   siteSettings: wholeSite,
   navigation: wholeSite,
-  page: ({ slug }) => [{ path: '/' }, ...(slug ? [{ path: `/${slug}` }] : [])],
+  // Pages can be linked from the header/footer menus, so a slug or title change has to
+  // reach every page, not just this one.
+  page: wholeSite,
 };
 
 /** Unknown `_type`s fall back to revalidating everything: slower, but never stale. */

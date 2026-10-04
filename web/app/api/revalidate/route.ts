@@ -34,6 +34,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 });
   }
 
+  if (typeof payload !== 'object' || payload === null) {
+    return NextResponse.json({ message: 'Body must be a JSON object' }, { status: 400 });
+  }
+
   const targets = resolveRevalidateTargets(payload);
   for (const { path, type } of targets) revalidatePath(path, type);
 

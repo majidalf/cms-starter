@@ -1,14 +1,13 @@
 import { createImageUrlBuilder } from '@sanity/image-url';
 import { sanityClient } from './client';
 
-/** Matches the shape the Sanity schema (studio/schemaTypes) produces for image fields.
- * Not importing types from the `sanity` package here on purpose - this app only ever reads
- * content, it doesn't need the Studio's full type surface for one small shape. */
+/** Minimal shape shared by every Sanity image field (`image`, `imageWithAlt`, ...), loose
+ * enough to accept the generated types in sanity.types.ts. */
 export interface SanityImageRef {
-  _type: 'image';
-  asset: { _type: 'reference'; _ref: string };
-  hotspot?: { x: number; y: number; height: number; width: number };
-  crop?: { top: number; bottom: number; left: number; right: number };
+  _type?: string;
+  asset?: { _ref: string } | null;
+  hotspot?: { x?: number; y?: number; height?: number; width?: number } | null;
+  crop?: { top?: number; bottom?: number; left?: number; right?: number } | null;
 }
 
 const builder = createImageUrlBuilder(sanityClient);
@@ -16,6 +15,15 @@ const builder = createImageUrlBuilder(sanityClient);
 /** For building a specific transform URL directly (e.g. a fixed-size thumbnail). */
 export function urlForImage(source: SanityImageRef) {
   return builder.image(source);
+}
+
+/** Sanity encodes the original size in the asset id (`image-<hash>-1200x800-jpg`), so
+ * next/image can get explicit dimensions (no layout shift) without an extra query. */
+export function getImageDimensions(
+  source: SanityImageRef,
+): { width: number; height: number } | undefined {
+  const match = source.asset?._ref.match(/-(\d+)x(\d+)-[a-z0-9]+$/);
+  return match ? { width: Number(match[1]), height: Number(match[2]) } : undefined;
 }
 
 interface NextImageLoaderParams {

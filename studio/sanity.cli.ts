@@ -13,4 +13,11 @@ export default defineCliConfig({
     // `sanity deploy` prints an appId on first deploy - add it here as
     // `appId: '<id>'` so later deploys don't ask again.
   },
+  // `npm run typegen`: types for the schema and for every defineQuery() in web/ land in
+  // web/sanity.types.ts (committed). Rerun after changing the schema or a query.
+  typegen: {
+    path: '../web/{app,components,lib}/**/*.{ts,tsx}',
+    schema: 'schema.json',
+    generates: '../web/sanity.types.ts',
+  },
 })

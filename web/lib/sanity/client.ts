@@ -10,10 +10,17 @@ if (!projectId || !dataset) {
   );
 }
 
-/** Read-only client for public content. No token: the dataset is public-read. */
+/**
+ * Read-only client for public content. No token: the dataset is public-read.
+ *
+ * useCdn: false on purpose. Rendered pages are cached by Next (R2), so Sanity is only
+ * queried at build time and when the publish webhook revalidates a page - exactly the
+ * moments that need fresh data. The API CDN can lag a few seconds behind a publish, which
+ * would re-cache the old content (seen in testing: a just-published page 404'd).
+ */
 export const sanityClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true,
+  useCdn: false,
 });

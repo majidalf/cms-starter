@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity';
+import {defineField, defineType} from 'sanity'
 
 /** The platform list is suggestions only, not a closed enum — editors can type any platform. */
 export default defineType({
@@ -23,6 +23,6 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'platform', subtitle: 'url' },
+    select: {title: 'platform', subtitle: 'url'},
   },
-});
+})
