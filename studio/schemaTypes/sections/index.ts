@@ -129,10 +129,29 @@ export const imageTextSection = defineType({
   preview: sectionPreview('Image + text'),
 })
 
+/** Lists every `credential` with `approvedForDisplay` on - the section only holds the
+ * heading. Delete together with the `credential` document type. */
+export const credentialListSection = defineType({
+  name: 'credentialListSection',
+  title: 'Credential list',
+  type: 'object',
+  fields: [
+    requiredHeading,
+    defineField({
+      name: 'intro',
+      title: 'Intro',
+      type: 'localeText',
+      description: 'The list itself shows every credential approved for display.',
+    }),
+  ],
+  preview: sectionPreview('Credential list'),
+})
+
 export const sectionTypes = [
   heroSection,
   richTextSection,
   ctaSection,
   featureListSection,
   imageTextSection,
+  credentialListSection,
 ]

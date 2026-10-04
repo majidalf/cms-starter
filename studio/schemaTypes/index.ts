@@ -13,9 +13,17 @@ import {sectionTypes} from './sections'
 import siteSettings from './documents/siteSettings'
 import navigation from './documents/navigation'
 import page from './documents/page'
+// Corporate preset (plan Section 4.3). Unused collections are removed per client - see
+// docs/NEW_PROJECT_CHECKLIST.md "Removing a collection".
+import person from './documents/person'
+import service from './documents/service'
+import industry from './documents/industry'
+import caseStudy from './documents/caseStudy'
+import insight from './documents/insight'
+import office from './documents/office'
+import jobOpening from './documents/jobOpening'
+import credential from './documents/credential'
 
-// The corporate preset (person, service, insight, ...) is added in phase T2b -
-// see docs/plan/STARTER_TEMPLATE_PLAN.md Section 4.3.
 export const schemaTypes: SchemaTypeDefinition[] = [
   // objects
   ...localeTypes,
@@ -32,4 +40,12 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   siteSettings,
   navigation,
   page,
+  service,
+  industry,
+  caseStudy,
+  insight,
+  person,
+  office,
+  jobOpening,
+  credential,
 ]

@@ -16,13 +16,19 @@ export function slugify(text: string): string {
     .slice(0, SLUG_MAX_LENGTH)
 }
 
+/** Text the suggested slug is made from: the title in the same language, or a plain
+ * `name` (e.g. a person's) when the document has no title. */
+function slugSource(document: Record<string, unknown> | undefined, locale: LocaleId) {
+  const title = (document?.title as Record<string, string | undefined> | undefined)?.[locale]
+  if (title) return title
+  return typeof document?.name === 'string' ? document.name : undefined
+}
+
 function slugRule(locale: LocaleId): CustomValidator<string | undefined> {
   return async (value, context) => {
     if (!value) {
-      const title = (context.document?.title as Record<string, string | undefined> | undefined)?.[
-        locale
-      ]
-      return title ? `Required. Suggested: ${slugify(title)}` : 'Required'
+      const source = slugSource(context.document, locale)
+      return source ? `Required. Suggested: ${slugify(source)}` : 'Required'
     }
     if (value.length > SLUG_MAX_LENGTH) return `Keep under ${SLUG_MAX_LENGTH} characters`
     if (!SLUG_PATTERN.test(value)) {

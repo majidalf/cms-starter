@@ -1,4 +1,4 @@
-import {CogIcon} from '@sanity/icons'
+import {CogIcon} from '@sanity/icons/Cog'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 /** Singleton (see structure.ts): one document with the fixed id "siteSettings". */

@@ -1,4 +1,4 @@
-import {DocumentIcon} from '@sanity/icons'
+import {DocumentIcon} from '@sanity/icons/Document'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 import {sectionTypes} from '../sections'
 
