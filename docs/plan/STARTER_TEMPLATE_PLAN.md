@@ -424,3 +424,17 @@ Hal-hal ini ditemukan saat menyusun rencana. Memperbaikinya di majidalf.com lebi
 2. Ubah `switch` di `app/api/revalidate/route.ts` menjadi peta config.
 3. CI deploy ke Cloudflare. Saat ini deploy masih manual, dan `.github/workflows/deploy.yml` masih menargetkan Hostinger.
 4. Jalankan gate CWV/Lighthouse (Phase 4.6) untuk mendapat baseline angka.
+5. **`useCdn: true` di `lib/sanity/client.ts`** → ganti `false`. Di cms-starter terbukti menyebabkan halaman basi atau 404 setelah publish (T2a).
+6. **Webhook revalidate tanpa jeda** → port `lib/sanity/revision.ts` dari cms-starter dan tambahkan `_id`, `_rev`, `operation` ke projection webhook. Di cms-starter, 2 dari 5 publish sempat menyimpan konten basi sampai publish berikutnya.
+7. **`next` 16.3.5** → naikkan ke ≥ 16.3.8. `@opennextjs/cloudflare` terbaru menolak rentang 16.0–16.3.7 (dan backport 15.5.27); kemungkinan perbaikan keamanan, advisory belum dicek.
+
+---
+
+## 13. Status dan langkah berikutnya (per 2026-10-04)
+
+- **Selesai:** T0, T1, T2a, plus perbaikan 404 dan webhook (commit `dd9b8c8`).
+- **Berikutnya:** T2b — preset korporat (Section 4.3).
+- **Menunggu keputusan pemilik repo:**
+  - Remote GitLab untuk `cms-starter` (semua commit masih lokal).
+  - `npm approve-scripts` untuk `esbuild` dan `workerd` di `web/` — dibutuhkan sebelum `cf:preview`/`cf:deploy` (T4).
+- **Lingkungan dev:** Sanity project `cms-starter-dev` (`wxyhn8wb`, dataset `production`, public-read). Isi ulang konten contoh: `cd studio && npx sanity dataset import seed/sample.ndjson production --replace`. `web/.env.local` dan `studio/.env` lokal sudah berisi project ID; `web/.env.local` juga berisi `SANITY_REVALIDATE_SECRET` uji lokal.
