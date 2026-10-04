@@ -724,7 +724,7 @@ export type CASE_STUDY_SLUGS_QUERY_RESULT = Array<{
 
 // Source: ../web/lib/sanity/collections/industry.ts
 // Variable: INDUSTRIES_QUERY
-// Query: *[_type == "industry" && defined(slug)]  | order(order asc, title.id asc){ _id, title, slug, summary }
+// Query: *[_type == "industry" && defined(slug)]  | order(coalesce(order, 9999) asc, title.id asc){ _id, title, slug, summary }
 export type INDUSTRIES_QUERY_RESULT = Array<{
   _id: string;
   title: RequiredLocaleString | null;
@@ -734,7 +734,7 @@ export type INDUSTRIES_QUERY_RESULT = Array<{
 
 // Source: ../web/lib/sanity/collections/industry.ts
 // Variable: INDUSTRY_BY_SLUG_QUERY
-// Query: *[_type == "industry" && slug[$locale] == $slug][0]{  _id, title, slug, summary, body, seo,  "services": *[_type == "service" && references(^._id)] | order(order asc){ _id, title, slug, summary },  "caseStudies": *[_type == "caseStudy" && clientConsent == true && references(^._id)] | order(year desc){    _id, title, slug, summary, client, year  }}
+// Query: *[_type == "industry" && slug[$locale] == $slug][0]{  _id, title, slug, summary, body, seo,  "services": *[_type == "service" && references(^._id)] | order(coalesce(order, 9999) asc){ _id, title, slug, summary },  "caseStudies": *[_type == "caseStudy" && clientConsent == true && references(^._id)] | order(year desc){    _id, title, slug, summary, client, year  }}
 export type INDUSTRY_BY_SLUG_QUERY_RESULT = {
   _id: string;
   title: RequiredLocaleString | null;
@@ -872,7 +872,7 @@ export type JOB_OPENING_SLUGS_QUERY_RESULT = Array<{
 
 // Source: ../web/lib/sanity/collections/office.ts
 // Variable: OFFICES_QUERY
-// Query: *[_type == "office"]  | order(order asc, name.id asc){ _id, name, address, phone, email }
+// Query: *[_type == "office"]  | order(coalesce(order, 9999) asc, name.id asc){ _id, name, address, phone, email }
 export type OFFICES_QUERY_RESULT = Array<{
   _id: string;
   name: RequiredLocaleString | null;
@@ -883,7 +883,7 @@ export type OFFICES_QUERY_RESULT = Array<{
 
 // Source: ../web/lib/sanity/collections/person.ts
 // Variable: PEOPLE_QUERY
-// Query: *[_type == "person" && defined(slug)]  | order(order asc, name asc){ _id, name, slug, position, group, photo }
+// Query: *[_type == "person" && defined(slug)]  | order(coalesce(order, 9999) asc, name asc){ _id, name, slug, position, group, photo }
 export type PEOPLE_QUERY_RESULT = Array<{
   _id: string;
   name: string | null;
@@ -954,7 +954,7 @@ export type PERSON_SLUGS_QUERY_RESULT = Array<{
 
 // Source: ../web/lib/sanity/collections/service.ts
 // Variable: SERVICES_QUERY
-// Query: *[_type == "service" && defined(slug)]  | order(order asc, title.id asc){ _id, title, slug, summary }
+// Query: *[_type == "service" && defined(slug)]  | order(coalesce(order, 9999) asc, title.id asc){ _id, title, slug, summary }
 export type SERVICES_QUERY_RESULT = Array<{
   _id: string;
   title: RequiredLocaleString | null;
@@ -1126,7 +1126,7 @@ export type NAVIGATION_QUERY_RESULT =
 
 // Source: ../web/lib/sanity/queries.ts
 // Variable: HOME_PAGE_QUERY
-// Query: *[_id == "siteSettings"][0].homePage->{   _id, title, slug, seo,  sections[]{    ...,    _type == "heroSection" => { "ctas": ctas[]{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "ctaSection" => { "cta": cta{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "credentialListSection" => {      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(order asc, year desc){        _id, title, issuer, year, logo      }    }  } }
+// Query: *[_id == "siteSettings"][0].homePage->{   _id, title, slug, seo,  sections[]{    ...,    _type == "heroSection" => { "ctas": ctas[]{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "ctaSection" => { "cta": cta{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "credentialListSection" => {      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(coalesce(order, 9999) asc, year desc){        _id, title, issuer, year, logo      }    }  } }
 export type HOME_PAGE_QUERY_RESULT = {
   _id: string;
   title: RequiredLocaleString | null;
@@ -1208,7 +1208,7 @@ export type HOME_PAGE_QUERY_RESULT = {
 
 // Source: ../web/lib/sanity/queries.ts
 // Variable: PAGE_BY_SLUG_QUERY
-// Query: *[  _type == "page" && slug[$locale] == $slug && _id != *[_id == "siteSettings"][0].homePage._ref][0]{   _id, title, slug, seo,  sections[]{    ...,    _type == "heroSection" => { "ctas": ctas[]{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "ctaSection" => { "cta": cta{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "credentialListSection" => {      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(order asc, year desc){        _id, title, issuer, year, logo      }    }  } }
+// Query: *[  _type == "page" && slug[$locale] == $slug && _id != *[_id == "siteSettings"][0].homePage._ref][0]{   _id, title, slug, seo,  sections[]{    ...,    _type == "heroSection" => { "ctas": ctas[]{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "ctaSection" => { "cta": cta{   _key, label, linkType, path, url,  "pageSlug": page->slug,  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref } },    _type == "credentialListSection" => {      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(coalesce(order, 9999) asc, year desc){        _id, title, issuer, year, logo      }    }  } }
 export type PAGE_BY_SLUG_QUERY_RESULT = {
   _id: string;
   title: RequiredLocaleString | null;
@@ -1309,8 +1309,8 @@ declare global {
     '*[\n  _type == "caseStudy" && clientConsent == true && slug[$locale] == $slug\n][0]{\n  _id, title, slug, summary, client, year, challenge, approach, outcome, seo,\n  "services": services[defined(@->slug)]->{ _id, title, slug, summary },\n  "industries": industries[defined(@->slug)]->{ _id, title, slug, summary }\n}': CASE_STUDY_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "caseStudy" && clientConsent == true && $slug in [slug.id, slug.en]\n][0]{ slug }': CASE_STUDY_BY_ANY_SLUG_QUERY_RESULT;
     '*[\n  _type == "caseStudy" && clientConsent == true && defined(slug)\n]{ slug }': CASE_STUDY_SLUGS_QUERY_RESULT;
-    '*[_type == "industry" && defined(slug)]\n  | order(order asc, title.id asc){ _id, title, slug, summary }': INDUSTRIES_QUERY_RESULT;
-    '*[_type == "industry" && slug[$locale] == $slug][0]{\n  _id, title, slug, summary, body, seo,\n  "services": *[_type == "service" && references(^._id)] | order(order asc){ _id, title, slug, summary },\n  "caseStudies": *[_type == "caseStudy" && clientConsent == true && references(^._id)] | order(year desc){\n    _id, title, slug, summary, client, year\n  }\n}': INDUSTRY_BY_SLUG_QUERY_RESULT;
+    '*[_type == "industry" && defined(slug)]\n  | order(coalesce(order, 9999) asc, title.id asc){ _id, title, slug, summary }': INDUSTRIES_QUERY_RESULT;
+    '*[_type == "industry" && slug[$locale] == $slug][0]{\n  _id, title, slug, summary, body, seo,\n  "services": *[_type == "service" && references(^._id)] | order(coalesce(order, 9999) asc){ _id, title, slug, summary },\n  "caseStudies": *[_type == "caseStudy" && clientConsent == true && references(^._id)] | order(year desc){\n    _id, title, slug, summary, client, year\n  }\n}': INDUSTRY_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "industry" && $slug in [slug.id, slug.en]\n][0]{ slug }': INDUSTRY_BY_ANY_SLUG_QUERY_RESULT;
     '*[_type == "industry" && defined(slug)]{ slug }': INDUSTRY_SLUGS_QUERY_RESULT;
     '*[_type == "insight" && defined(slug)]\n  | order(publishedAt desc, _createdAt desc){ _id, title, slug, excerpt, category, publishedAt }': INSIGHTS_QUERY_RESULT;
@@ -1321,19 +1321,19 @@ declare global {
     '*[\n  _type == "jobOpening" && isOpen == true && slug[$locale] == $slug\n][0]{ _id, title, slug, location, employmentType, deadline, description, applyUrl, seo }': JOB_OPENING_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "jobOpening" && isOpen == true && $slug in [slug.id, slug.en]\n][0]{ slug }': JOB_OPENING_BY_ANY_SLUG_QUERY_RESULT;
     '*[\n  _type == "jobOpening" && isOpen == true && defined(slug)\n]{ slug }': JOB_OPENING_SLUGS_QUERY_RESULT;
-    '*[_type == "office"]\n  | order(order asc, name.id asc){ _id, name, address, phone, email }': OFFICES_QUERY_RESULT;
-    '*[_type == "person" && defined(slug)]\n  | order(order asc, name asc){ _id, name, slug, position, group, photo }': PEOPLE_QUERY_RESULT;
+    '*[_type == "office"]\n  | order(coalesce(order, 9999) asc, name.id asc){ _id, name, address, phone, email }': OFFICES_QUERY_RESULT;
+    '*[_type == "person" && defined(slug)]\n  | order(coalesce(order, 9999) asc, name asc){ _id, name, slug, position, group, photo }': PEOPLE_QUERY_RESULT;
     '*[_type == "person" && slug[$locale] == $slug][0]{\n  _id, name, slug, position, group, photo, bio, credentials, languages, email, linkedin, seo,\n  "services": services[defined(@->slug)]->{ _id, title, slug, summary },\n  "office": office->{ name, address, phone, email },\n  "insights": *[_type == "insight" && references(^._id)] | order(publishedAt desc)[0...3]{\n    _id, title, slug, excerpt, category, publishedAt\n  }\n}': PERSON_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "person" && $slug in [slug.id, slug.en]\n][0]{ slug }': PERSON_BY_ANY_SLUG_QUERY_RESULT;
     '*[_type == "person" && defined(slug)]{ slug }': PERSON_SLUGS_QUERY_RESULT;
-    '*[_type == "service" && defined(slug)]\n  | order(order asc, title.id asc){ _id, title, slug, summary }': SERVICES_QUERY_RESULT;
+    '*[_type == "service" && defined(slug)]\n  | order(coalesce(order, 9999) asc, title.id asc){ _id, title, slug, summary }': SERVICES_QUERY_RESULT;
     '*[_type == "service" && slug[$locale] == $slug][0]{\n  _id, title, slug, summary, body, seo,\n  "keyContacts": keyContacts[defined(@->slug)]->{ _id, name, slug, position, group, photo },\n  "industries": industries[defined(@->slug)]->{ _id, title, slug, summary },\n  "caseStudies": *[_type == "caseStudy" && clientConsent == true && references(^._id)] | order(year desc){\n    _id, title, slug, summary, client, year\n  },\n  "insights": *[_type == "insight" && references(^._id)] | order(publishedAt desc)[0...3]{\n    _id, title, slug, excerpt, category, publishedAt\n  }\n}': SERVICE_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "service" && $slug in [slug.id, slug.en]\n][0]{ slug }': SERVICE_BY_ANY_SLUG_QUERY_RESULT;
     '*[_type == "service" && defined(slug)]{ slug }': SERVICE_SLUGS_QUERY_RESULT;
     '*[_id == "siteSettings"][0]{\n  organizationName, legalName, tagline, logo, footerText, disclaimer,\n  email, phone, address, socialLinks, defaultSeo\n}': SITE_SETTINGS_QUERY_RESULT;
     '*[_id == "navigation"][0]{\n  "header": header[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n },\n  "footer": footer[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n }\n}': NAVIGATION_QUERY_RESULT;
-    '*[_id == "siteSettings"][0].homePage->{ \n  _id, title, slug, seo,\n  sections[]{\n    ...,\n    _type == "heroSection" => { "ctas": ctas[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "ctaSection" => { "cta": cta{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "credentialListSection" => {\n      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(order asc, year desc){\n        _id, title, issuer, year, logo\n      }\n    }\n  }\n }': HOME_PAGE_QUERY_RESULT;
-    '*[\n  _type == "page" && slug[$locale] == $slug && _id != *[_id == "siteSettings"][0].homePage._ref\n][0]{ \n  _id, title, slug, seo,\n  sections[]{\n    ...,\n    _type == "heroSection" => { "ctas": ctas[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "ctaSection" => { "cta": cta{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "credentialListSection" => {\n      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(order asc, year desc){\n        _id, title, issuer, year, logo\n      }\n    }\n  }\n }': PAGE_BY_SLUG_QUERY_RESULT;
+    '*[_id == "siteSettings"][0].homePage->{ \n  _id, title, slug, seo,\n  sections[]{\n    ...,\n    _type == "heroSection" => { "ctas": ctas[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "ctaSection" => { "cta": cta{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "credentialListSection" => {\n      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(coalesce(order, 9999) asc, year desc){\n        _id, title, issuer, year, logo\n      }\n    }\n  }\n }': HOME_PAGE_QUERY_RESULT;
+    '*[\n  _type == "page" && slug[$locale] == $slug && _id != *[_id == "siteSettings"][0].homePage._ref\n][0]{ \n  _id, title, slug, seo,\n  sections[]{\n    ...,\n    _type == "heroSection" => { "ctas": ctas[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "ctaSection" => { "cta": cta{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "credentialListSection" => {\n      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(coalesce(order, 9999) asc, year desc){\n        _id, title, issuer, year, logo\n      }\n    }\n  }\n }': PAGE_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "page" && $slug in [slug.id, slug.en] && _id != *[_id == "siteSettings"][0].homePage._ref\n][0]{ slug }': PAGE_BY_ANY_SLUG_QUERY_RESULT;
     '*[\n  _type == "page" && defined(slug) && _id != *[_id == "siteSettings"][0].homePage._ref\n]{ slug }': PAGE_SLUGS_QUERY_RESULT;
   }

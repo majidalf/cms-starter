@@ -36,7 +36,7 @@ export function SiteFooter({ locale, settings, links, offices }: Props) {
           </nav>
         )}
         {offices.length > 0 && (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul aria-label={t.offices} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {offices.map((office) => (
               <li key={office._id} className="flex flex-col gap-1">
                 <span className="font-medium text-ink">{localize(office.name, locale)}</span>

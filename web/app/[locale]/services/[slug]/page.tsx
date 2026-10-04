@@ -12,7 +12,7 @@ import {
 import { localize } from '@/lib/sanity/localize';
 import { EntryList } from '@/components/collections/EntryList';
 import { PageHeader } from '@/components/collections/PageHeader';
-import { PersonList } from '@/components/collections/PersonList';
+import { PersonList, visiblePeople } from '@/components/collections/PersonList';
 import { RelatedBlock } from '@/components/collections/RelatedBlock';
 import { RichText } from '@/components/collections/RichText';
 import {
@@ -56,6 +56,7 @@ export default async function ServicePage({ params }: PageProps<'/[locale]/servi
   const industries = industryEntries(service.industries ?? [], locale);
   const caseStudies = caseStudyEntries(service.caseStudies, locale);
   const insights = insightEntries(service.insights, locale);
+  const keyContacts = visiblePeople(service.keyContacts ?? [], locale);
 
   return (
     <article className="pb-16">
@@ -65,8 +66,8 @@ export default async function ServicePage({ params }: PageProps<'/[locale]/servi
         back={{ href: localePath(locale, BASE), label: t.services }}
       />
       <RichText value={localize(service.body, locale)} />
-      <RelatedBlock title={t.keyContacts} isEmpty={!service.keyContacts?.length}>
-        <PersonList people={service.keyContacts ?? []} locale={locale} />
+      <RelatedBlock title={t.keyContacts} isEmpty={keyContacts.length === 0}>
+        <PersonList people={keyContacts} locale={locale} />
       </RelatedBlock>
       <RelatedBlock title={t.relatedIndustries} isEmpty={industries.length === 0}>
         <EntryList entries={industries} headingLevel="h3" />

@@ -11,7 +11,7 @@ import {
 } from '../fragments';
 
 export const SERVICES_QUERY = defineQuery(`*[_type == "service" && defined(slug)]
-  | order(order asc, title.id asc){ ${SERVICE_CARD} }`);
+  | order(coalesce(order, 9999) asc, title.id asc){ ${SERVICE_CARD} }`);
 
 export const SERVICE_BY_SLUG_QUERY =
   defineQuery(`*[_type == "service" && slug[$locale] == $slug][0]{

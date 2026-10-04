@@ -12,9 +12,10 @@ export interface LinkValue {
   isHomePage?: boolean | null;
 }
 
-const SAFE_HREF = /^(https?:|mailto:|tel:|\/)/i;
+const SAFE_HREF = /^(https?:|mailto:|tel:|\/(?!\/))/i;
 
-/** Only http(s), mailto, tel and on-site paths may reach an href - never `javascript:` and
+/** Only http(s), mailto, tel and on-site paths (not protocol-relative `//host`) may reach an
+ * href - never `javascript:` and
  * the like, even if content bypassed Studio validation (e.g. an API import). */
 export function safeHref(href: string | null | undefined): string | undefined {
   return href && SAFE_HREF.test(href) ? href : undefined;

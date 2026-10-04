@@ -22,7 +22,7 @@ const PAGE_FIELDS = `
     _type == "heroSection" => { "ctas": ctas[]{ ${LINK_FIELDS} } },
     _type == "ctaSection" => { "cta": cta{ ${LINK_FIELDS} } },
     _type == "credentialListSection" => {
-      "credentials": *[${CREDENTIAL_VISIBLE}] | order(order asc, year desc){
+      "credentials": *[${CREDENTIAL_VISIBLE}] | order(coalesce(order, 9999) asc, year desc){
         _id, title, issuer, year, logo
       }
     }

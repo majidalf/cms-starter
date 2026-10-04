@@ -44,6 +44,7 @@ export default async function JobOpeningPage({ params }: PageProps<'/[locale]/ca
   const t = getDictionary(locale);
   const deadline = formatDate(opening.deadline, locale);
   const applyHref = safeHref(opening.applyUrl);
+  const isMailto = applyHref?.toLowerCase().startsWith('mailto:') ?? false;
   const facts = [
     { label: t.location, value: localize(opening.location, locale) },
     {
@@ -76,11 +77,9 @@ export default async function JobOpeningPage({ params }: PageProps<'/[locale]/ca
             <a
               href={applyHref}
               className="inline-flex items-center bg-brand px-5 py-3 text-sm font-medium text-surface hover:bg-ink"
-              {...(applyHref.startsWith('http')
-                ? { target: '_blank', rel: 'noopener noreferrer' }
-                : {})}
+              {...(!isMailto ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             >
-              {applyHref.startsWith('mailto:') ? applyHref.slice('mailto:'.length) : t.apply}
+              {isMailto ? applyHref.slice('mailto:'.length) : t.apply}
             </a>
           </p>
         </Container>

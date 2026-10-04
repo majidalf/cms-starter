@@ -11,6 +11,9 @@ export const CASE_STUDY_VISIBLE = `_type == "caseStudy" && clientConsent == true
 export const CREDENTIAL_VISIBLE = `_type == "credential" && approvedForDisplay == true`;
 export const JOB_OPENING_VISIBLE = `_type == "jobOpening" && isOpen == true`;
 
+// Lists sort by `coalesce(order, 9999)` so documents without an order come last, as the
+// Studio field description ("Lower numbers are listed first") implies.
+
 export const PERSON_CARD = `_id, name, slug, position, group, photo`;
 export const SERVICE_CARD = `_id, title, slug, summary`;
 export const INDUSTRY_CARD = `_id, title, slug, summary`;

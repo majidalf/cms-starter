@@ -17,6 +17,13 @@ export interface PersonCard {
   photo: ComponentProps<typeof SanityImage>['image'];
 }
 
+/** People that can be linked in this language (name and slug present). */
+export function visiblePeople<T extends PersonCard>(people: T[], locale: Locale): T[] {
+  return people.filter(
+    (person) => person.name && detailPath(locale, routes.leadership, person.slug),
+  );
+}
+
 interface Props {
   people: PersonCard[];
   locale: Locale;
@@ -29,9 +36,9 @@ export function PersonList({ people, locale, headingLevel = 'h3' }: Props) {
   const Heading = headingLevel;
   return (
     <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-      {people.map((person) => {
+      {visiblePeople(people, locale).map((person) => {
         const href = detailPath(locale, routes.leadership, person.slug);
-        if (!href || !person.name) return null;
+        if (!href) return null;
         return (
           <li key={person._id} className="flex flex-col gap-3">
             <SanityImage

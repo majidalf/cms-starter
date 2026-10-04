@@ -4,7 +4,7 @@ import { sanityClient } from '../client';
 import { INSIGHT_CARD, PERSON_CARD, SERVICE_CARD } from '../fragments';
 
 export const PEOPLE_QUERY = defineQuery(`*[_type == "person" && defined(slug)]
-  | order(order asc, name asc){ ${PERSON_CARD} }`);
+  | order(coalesce(order, 9999) asc, name asc){ ${PERSON_CARD} }`);
 
 export const PERSON_BY_SLUG_QUERY = defineQuery(`*[_type == "person" && slug[$locale] == $slug][0]{
   ${PERSON_CARD}, bio, credentials, languages, email, linkedin, seo,

@@ -5,6 +5,18 @@ const SLUG_MAX_LENGTH = 96
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const API_VERSION = '2025-01-01'
 
+/** First path segments taken by the corporate preset routes (web/lib/routes.ts and the
+ * folders in web/app/[locale]/). A `page` with one of these slugs would never be reachable,
+ * because the route folder wins over app/[locale]/[slug]. Keep in sync with routes.ts. */
+const RESERVED_PAGE_SLUGS = new Set([
+  'services',
+  'industries',
+  'case-studies',
+  'insights',
+  'careers',
+  'contact',
+])
+
 /** "Tentang Kami & Visi" -> "tentang-kami-visi" */
 export function slugify(text: string): string {
   return text
@@ -33,6 +45,9 @@ function slugRule(locale: LocaleId): CustomValidator<string | undefined> {
     if (value.length > SLUG_MAX_LENGTH) return `Keep under ${SLUG_MAX_LENGTH} characters`
     if (!SLUG_PATTERN.test(value)) {
       return `Use lowercase letters, numbers and single hyphens only. Suggested: ${slugify(value)}`
+    }
+    if (context.document?._type === 'page' && RESERVED_PAGE_SLUGS.has(value)) {
+      return `"${value}" is used by a built-in section of the site - choose another slug`
     }
 
     const id = context.document?._id.replace(/^drafts\./, '')
