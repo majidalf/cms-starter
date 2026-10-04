@@ -1,0 +1,4 @@
+# web/ and studio/ each have their own .gitignore - this file only covers the repo root.
+node_modules/
+.DS_Store
+*.log

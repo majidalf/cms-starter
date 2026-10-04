@@ -1,0 +1,36 @@
+{
+  // "cms-starter" is the template default and must stay a valid Worker name: next.config.ts
+  // validates this file even during `next build`. scripts/setup.mjs replaces it and
+  // {{D1_DATABASE_ID}} - see docs/plan/STARTER_TEMPLATE_PLAN.md Section 8.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cms-starter",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-13",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "cms-starter",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "cms-starter-cache",
+    },
+  ],
+  "d1_databases": [
+    {
+      // Binding name must stay exactly "NEXT_TAG_CACHE_D1" - that's what
+      // open-next.config.ts's d1NextTagCache reads from env at runtime.
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "cms-starter-tag-cache",
+      // Printed by `npx wrangler d1 create cms-starter-tag-cache`.
+      "database_id": "{{D1_DATABASE_ID}}",
+    },
+  ],
+}

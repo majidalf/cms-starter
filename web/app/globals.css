@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/*
+ * Design tokens. Tailwind 4 has no tailwind.config.ts - every token lives here, so a
+ * new client's brand only means editing this block. Values below are neutral
+ * placeholders, not a design.
+ */
+@theme {
+  --color-surface: oklch(98.5% 0.004 90);
+  --color-ink: oklch(22% 0.01 260);
+  --color-muted: oklch(50% 0.01 260);
+  --color-brand: oklch(35% 0.08 255);
+  --color-accent: oklch(62% 0.12 70);
+
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, serif;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
