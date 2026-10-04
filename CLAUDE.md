@@ -18,6 +18,10 @@ OpenNext, content from a standalone Sanity Studio. Bilingual (Indonesian default
 ## Checks before committing
 
 ```bash
-cd web && npm run lint && npm run format:check && npm run typecheck && npm run build
+cd web && npm run lint && npm run format:check && npm run typecheck && npm run test && npm run build
 cd studio && npm run schema:validate && npm run build   # needs studio/.env
 ```
+
+After changing pages, queries or the seed, also run against the built site (seed dataset
+imported): `cd web && npm run test:e2e` (Playwright + axe) and `npm run lhci` (Lighthouse,
+set `CHROME_PATH` to a Chrome/Chromium binary). CI runs the same steps (`.gitlab-ci.yml`).

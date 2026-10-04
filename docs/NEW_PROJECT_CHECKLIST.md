@@ -1,7 +1,21 @@
 # New project checklist
 
 > Provisioning steps (Sanity project, R2, D1, secrets, domain, Studio deploy) are written in
-> phase T6. This file currently holds only the corporate preset section.
+> phase T6. Until then, note that `{{D1_DATABASE_ID}}` in `web/wrangler.jsonc` must be replaced
+> (by `scripts/setup.mjs`, plan Section 8) before `cf:deploy` - and so the CI deploy job - can
+> succeed.
+
+## Per-client settings
+
+- `web/lib/jsonLd.ts`: narrow `ORGANIZATION_TYPE` (e.g. `LegalService` for a law firm).
+- `web/lib/securityHeaders.ts`: add every outside origin the site loads from (analytics,
+  embedded maps or video, web fonts) to the matching CSP directive. Anything not listed is
+  blocked; video falls back to `default-src 'self'`, so Sanity-hosted video needs
+  `media-src https://cdn.sanity.io`.
+- `.gitlab-ci.yml` variables (listed at the top of that file). E2E and Lighthouse visit seed
+  URLs, so CI needs a dataset holding the seed - or replace the URLs in
+  `web/tests/e2e/fixtures.ts`, `web/tests/e2e/seo.spec.ts`, `web/tests/e2e/smoke.spec.ts` and
+  `web/lighthouserc.json` with real content.
 
 ## Corporate preset: relabel, rename, or remove collections
 
@@ -23,6 +37,8 @@ for each one: keep as is, relabel, rename its route, or remove.
 3. `studio/schemaTypes/objects/localeSlug.ts`: update `RESERVED_PAGE_SLUGS`, so no `page`
    takes the new route name as its slug.
 4. Update navigation links that use the old path (Studio → Navigation, "Site path" links).
+5. Update the URLs in `web/tests/e2e/fixtures.ts`, `web/tests/e2e/seo.spec.ts` and
+   `web/lighthouserc.json`.
 
 ### Remove a collection
 
@@ -58,11 +74,19 @@ for are listed per type below.
     - `page` slugs: drop the route from `RESERVED_PAGE_SLUGS` in
       `studio/schemaTypes/objects/localeSlug.ts`.
 
+14. Sitemap: remove the type from `SITEMAP_ROUTES` (`web/lib/sitemap.ts`) and from
+    `SITEMAP_QUERY` (`web/lib/sanity/sitemapQuery.ts`).
+15. Tests: remove its URLs from `PAGE_PAIRS` (`web/tests/e2e/fixtures.ts`), its seed text and
+    URLs from `web/tests/e2e/smoke.spec.ts` and `seo.spec.ts`, its URL from
+    `web/lighthouserc.json`, and its getters/expectations from `web/tests/unit/queries.test.ts`
+    and `revalidateConfig.test.ts`.
+
 **Regenerate and check** - the type checker finds whatever was missed:
 
 ```bash
 cd studio && npm run typegen && npm run schema:validate && npm run build
-cd ../web && npm run format && npm run typecheck && npm run lint && npm run build
+cd ../web && npm run format && npm run typecheck && npm run lint && npm run test && npm run build
+npm run test:e2e   # against the built site, seed imported
 ```
 
 `npm run format` is needed because removing imports leaves lines Prettier wants to rejoin.
@@ -71,10 +95,10 @@ Then search for leftovers, e.g. `grep -rni "industr" web/app web/lib web/compone
 
 **Content**
 
-14. `studio/seed/sample.ndjson`: remove its documents and every reference to them.
-15. Delete its documents from the dataset (`npx sanity documents delete <id> ...`), or
+16. `studio/seed/sample.ndjson`: remove its documents and every reference to them.
+17. Delete its documents from the dataset (`npx sanity documents delete <id> ...`), or
     re-import the seed with `--replace` on a fresh dataset.
-16. Studio → Navigation: remove menu links to its route.
+18. Studio → Navigation: remove menu links to its route.
 
 | Type | Route folder(s) in `web/app/[locale]/` | Referenced from (schema field → query) | Also shown in |
 |---|---|---|---|
