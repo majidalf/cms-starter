@@ -3,13 +3,20 @@
  * This map is the only thing a new project should need to edit - the webhook handler
  * in app/api/revalidate/route.ts stays generic.
  *
- * The Sanity webhook must send this projection:
- *   {"_type": _type, "slugs": slug}
+ * The Sanity webhook (trigger on create, update and delete; published documents only) must
+ * send this projection:
+ *   {"_id": _id, "_rev": _rev, "_type": _type, "operation": delta::operation(), "slugs": slug}
+ * `_id`, `_rev` and `operation` let the handler wait until the change is queryable before
+ * revalidating (see lib/sanity/revision.ts).
  */
 import type { Locale } from '@/lib/i18n';
+import type { DocumentOperation } from '@/lib/sanity/revision';
 
 export interface RevalidatePayload {
+  _id?: string;
+  _rev?: string;
   _type?: string;
+  operation?: DocumentOperation;
   slugs?: Partial<Record<Locale, string | null>> | null;
 }
 

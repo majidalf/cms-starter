@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache';
 import { isValidSignature, SIGNATURE_HEADER_NAME } from '@sanity/webhook';
 import { NextResponse } from 'next/server';
 import { resolveRevalidateTargets, type RevalidatePayload } from '@/lib/revalidate.config';
+import { waitForRevision } from '@/lib/sanity/revision';
 
 /**
  * Sanity webhook receiver. Configure in the Sanity project (once this app has a public
@@ -36,6 +37,20 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (typeof payload !== 'object' || payload === null) {
     return NextResponse.json({ message: 'Body must be a JSON object' }, { status: 400 });
+  }
+
+  if (!payload._id) {
+    return NextResponse.json(
+      { message: 'Payload needs _id, _rev and operation - see lib/revalidate.config.ts' },
+      { status: 400 },
+    );
+  }
+  // 503 makes Sanity retry the webhook later, instead of caching stale content now.
+  if (!(await waitForRevision(payload._id, payload._rev, payload.operation))) {
+    return NextResponse.json(
+      { message: 'Change not visible in Sanity yet, retry later' },
+      { status: 503 },
+    );
   }
 
   const targets = resolveRevalidateTargets(payload);

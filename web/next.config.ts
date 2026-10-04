@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  experimental: {
+    // The root layout is in app/[locale], so not-found.tsx can't catch notFound() there:
+    // the server sent an empty error shell instead of the 404 page. global-not-found.tsx
+    // renders a complete 404 document instead.
+    globalNotFound: true,
+  },
   images: {
     // next/image's default sharp-based optimizer doesn't run on Cloudflare Workers -
     // all resizing happens on Sanity's own image CDN instead. See lib/sanity/image.ts.
