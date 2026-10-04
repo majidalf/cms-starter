@@ -61,10 +61,7 @@ web:check:
   artifacts:
     when: always
     expire_in: 1 week
-    # The build is reused by web:e2e and web:lighthouse, so they test exactly what passed
-    # here (and Sanity is queried once per pipeline, not three times).
-    paths: [web/coverage/, web/.next/]
-    exclude: [web/.next/cache/**/*]
+    paths: [web/coverage/]
 
 studio:check:
   extends: .studio
@@ -73,11 +70,18 @@ studio:check:
     - npm run schema:validate
     - npm run build
 
-# Both jobs serve the web:check build (artifact) with `next start`. Plan Section 6 wants the
-# OpenNext Worker preview (`opennextjs-cloudflare build` + `preview`) here; that needs
-# workerd's install script, which waits on `npm approve-scripts` (STARTER_TEMPLATE_PLAN
-# Section 13). Switch the web server in playwright.config.ts and lighthouserc.json once
-# that is approved.
+# Build the OpenNext Worker once. E2E and Lighthouse run against it in workerd (the
+# runtime production uses), and the deploy job ships these same files - what was tested
+# is what goes live.
+web:build-worker:
+  extends: .web
+  stage: check
+  script:
+    - npm run cf:build
+  artifacts:
+    expire_in: 1 week
+    paths: [web/.open-next/]
+
 .web:browser:
   extends: .web
   # Keep the tag equal to the exact @playwright/test version in web/package.json - the image
@@ -85,11 +89,13 @@ studio:check:
   image: mcr.microsoft.com/playwright:v1.63.0-noble
   stage: test
   needs:
-    - job: web:check
+    - job: web:build-worker
       artifacts: true
 
 web:e2e:
   extends: .web:browser
+  variables:
+    E2E_SERVER: worker
   script:
     - npm run test:e2e
   artifacts:
@@ -101,25 +107,35 @@ web:lighthouse:
   extends: .web:browser
   script:
     - export CHROME_PATH="$(node -e "console.log(require('playwright-core').chromium.executablePath())")"
-    - npm run lhci
+    - npm run lhci -- --collect.startServerCommand="npm run cf:preview:serve"
   artifacts:
     when: always
     expire_in: 1 week
     paths: [web/.lighthouseci/]
 
 # Deploys only from the default branch, and only once the Cloudflare token is configured -
-# so pushing the template before provisioning never fails the pipeline.
+# so pushing the template before provisioning never fails the pipeline. Use an API token
+# scoped to this account with Workers Scripts, Workers R2 Storage and D1 edit rights only.
 web:deploy:
   extends: .web
   stage: deploy
-  needs: [web:check, web:e2e, web:lighthouse]
+  needs:
+    - job: web:check
+      artifacts: false
+    - job: web:build-worker
+      artifacts: true
+    - job: web:e2e
+      artifacts: false
+    - job: web:lighthouse
+      artifacts: false
   # Never cancel a deploy halfway because a newer commit arrived.
   interruptible: false
   resource_group: production
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CLOUDFLARE_API_TOKEN
   script:
-    - npm run cf:deploy
+    # Deploys the tested web:build-worker output; `npm run cf:deploy` would rebuild.
+    - npx opennextjs-cloudflare deploy
   environment:
     name: production
     url: $NEXT_PUBLIC_SITE_URL
