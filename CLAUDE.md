@@ -24,4 +24,11 @@ cd studio && npm run schema:validate && npm run build   # needs studio/.env
 
 After changing pages, queries or the seed, also run against the built site (seed dataset
 imported): `cd web && npm run test:e2e` (Playwright + axe) and `npm run lhci` (Lighthouse,
-set `CHROME_PATH` to a Chrome/Chromium binary). CI runs the same steps (`.gitlab-ci.yml`).
+set `CHROME_PATH` to a Chrome/Chromium binary). These default to `next start`; before
+committing routing or caching changes, run them on the Worker runtime as CI does:
+`npm run cf:build`, then `E2E_SERVER=worker npm run test:e2e` - OpenNext behaves differently
+from `next start` (see `components/layout/LanguageSwitcher.tsx`).
+
+Install scripts are allowed per exact version (`allowScripts` in `web/package.json`,
+decision D-9). After upgrading `workerd` or `esbuild`, review the new script and lockfile
+integrity before `npm approve-scripts`.
