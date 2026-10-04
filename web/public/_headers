@@ -1,2 +1,9 @@
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
+
+# Files served straight from public/ by the Workers assets binding skip next.config.ts
+# headers(); give them the headers that matter for static files.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { isLocale, localePath, pathsForAllLocales } from '@/lib/i18n';
 import { getHomePage, getSiteSettings } from '@/lib/sanity/queries';
-import { organizationJsonLd, websiteJsonLd } from '@/lib/jsonLd';
+import { websiteJsonLd } from '@/lib/jsonLd';
 import { buildMetadata } from '@/lib/seo';
 import { absoluteUrl, siteUrl } from '@/lib/site';
 import { JsonLd } from '@/components/JsonLd';
@@ -29,21 +29,12 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
   if (!page) {
     throw new Error('No home page. Choose one under "Site settings → Home page" in Studio.');
   }
-  const name = settings?.organizationName ?? '';
-  const url = absoluteUrl(localePath(locale));
-  const structuredData = [
-    organizationJsonLd({
-      name,
-      legalName: settings?.legalName,
-      url: siteUrl.origin,
-      logo: settings?.logo,
-      email: settings?.email,
-      phone: settings?.phone,
-      address: settings?.address,
-      sameAs: settings?.socialLinks?.map((link) => link.url),
-    }),
-    websiteJsonLd({ name, url, language: locale }),
-  ];
+  const structuredData = websiteJsonLd({
+    name: settings?.organizationName ?? '',
+    url: absoluteUrl(localePath(locale)),
+    language: locale,
+    organizationUrl: siteUrl.origin,
+  });
 
   return (
     <>

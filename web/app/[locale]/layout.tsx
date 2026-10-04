@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { defaultLocale, getDictionary, isLocale, locales } from '@/lib/i18n';
+import { organizationJsonLd } from '@/lib/jsonLd';
 import { resolveLinks } from '@/lib/links';
 import { getOffices } from '@/lib/sanity/collections/office';
 import { getNavigation, getSiteSettings } from '@/lib/sanity/queries';
 import { siteUrl } from '@/lib/site';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { JsonLd } from '@/components/JsonLd';
 import '../globals.css';
 
 // Root layout lives under [locale] so <html lang> follows the URL; `/` redirects to /id in
@@ -44,10 +46,22 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
     );
   }
   const t = getDictionary(locale);
+  // On every page, so the WebSite, Person and Article nodes can reference it by @id.
+  const organization = organizationJsonLd({
+    name: settings.organizationName ?? '',
+    legalName: settings.legalName,
+    url: siteUrl.origin,
+    logo: settings.logo,
+    email: settings.email,
+    phone: settings.phone,
+    address: settings.address,
+    sameAs: settings.socialLinks?.map((link) => link.url),
+  });
 
   return (
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col font-sans">
+        <JsonLd data={organization} />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-surface focus:px-4 focus:py-2"

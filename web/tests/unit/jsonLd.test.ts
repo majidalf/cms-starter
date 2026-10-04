@@ -54,11 +54,26 @@ describe('postalAddress', () => {
 });
 
 describe('other builders', () => {
-  it('websiteJsonLd points at the organization', () => {
-    expect(websiteJsonLd({ name: 'Contoh', url: `${url}/id`, language: 'id' })).toMatchObject({
-      '@type': 'WebSite',
-      inLanguage: 'id',
+  it('websiteJsonLd, personJsonLd and articleJsonLd point at the Organization @id', () => {
+    const organization = organizationJsonLd({ name: 'Contoh', url });
+    const website = websiteJsonLd({
+      name: 'Contoh',
+      url: `${url}/id`,
+      language: 'id',
+      organizationUrl: url,
     });
+    expect(website).toMatchObject({ '@type': 'WebSite', inLanguage: 'id' });
+    expect(website.publisher).toEqual({ '@id': organization['@id'] });
+    const person = personJsonLd({ name: 'A', url, organizationUrl: url });
+    expect(person.worksFor).toEqual({ '@id': organization['@id'] });
+    const article = articleJsonLd({
+      headline: 'A',
+      url,
+      language: 'en',
+      authors: [],
+      organizationUrl: url,
+    });
+    expect(article.publisher).toEqual({ '@id': organization['@id'] });
   });
 
   it('breadcrumbJsonLd numbers items from 1', () => {

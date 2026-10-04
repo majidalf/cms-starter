@@ -14,6 +14,12 @@ export const ORGANIZATION_TYPE = 'Organization';
 
 export type JsonLdObject = Record<string, unknown>;
 
+/** The Organization node's `@id`. The node is rendered by the root layout on every page,
+ * so WebSite, Person and Article nodes can point at it on the same page. */
+export function organizationId(origin: string): string {
+  return `${origin}#organization`;
+}
+
 const CONTEXT = 'https://schema.org';
 const LOGO_WIDTH = 512;
 
@@ -65,7 +71,7 @@ export function organizationJsonLd(input: OrganizationInput): JsonLdObject {
   return compact({
     '@context': CONTEXT,
     '@type': ORGANIZATION_TYPE,
-    '@id': `${input.url}#organization`,
+    '@id': organizationId(input.url),
     name: input.name,
     legalName: input.legalName,
     url: input.url,
@@ -77,14 +83,19 @@ export function organizationJsonLd(input: OrganizationInput): JsonLdObject {
   });
 }
 
-export function websiteJsonLd(input: { name: string; url: string; language: string }) {
+export function websiteJsonLd(input: {
+  name: string;
+  url: string;
+  language: string;
+  organizationUrl: string;
+}): JsonLdObject {
   return compact({
     '@context': CONTEXT,
     '@type': 'WebSite',
     name: input.name,
     url: input.url,
     inLanguage: input.language,
-    publisher: { '@id': `${input.url}#organization` },
+    publisher: { '@id': organizationId(input.organizationUrl) },
   });
 }
 
@@ -120,7 +131,7 @@ export function personJsonLd(input: {
     email: input.email,
     image: input.image?.asset ? urlForImage(input.image).width(LOGO_WIDTH).url() : undefined,
     sameAs: (input.sameAs ?? []).filter((url): url is string => Boolean(url)),
-    worksFor: { '@id': `${input.organizationUrl}#organization` },
+    worksFor: { '@id': organizationId(input.organizationUrl) },
   });
 }
 
@@ -147,7 +158,7 @@ export function articleJsonLd(input: {
       name: author.name,
       url: author.url,
     })),
-    publisher: { '@id': `${input.organizationUrl}#organization` },
+    publisher: { '@id': organizationId(input.organizationUrl) },
   });
 }
 

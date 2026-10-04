@@ -38,7 +38,7 @@ export const PAGE_PAIRS: { name: string; id: string; en: string }[] = [
   { name: 'contact', id: '/id/contact', en: '/en/contact' },
 ];
 
-/** Every page: [label, path, lang, counterpart paths]. */
+/** Every page: label, path, language and the id/en pair it belongs to. */
 export const PAGES = PAGE_PAIRS.flatMap((pair) => [
   { label: `${pair.name} (id)`, path: pair.id, lang: 'id', pair },
   { label: `${pair.name} (en)`, path: pair.en, lang: 'en', pair },
