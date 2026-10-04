@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { notFound, redirect } from 'next/navigation';
-import { isLocale, localePath, pathsForAllLocales } from '@/lib/i18n';
-import { localize, localizeSlug } from '@/lib/sanity/localize';
+import { notFound } from 'next/navigation';
+import { detailPaths, redirectToLocalizedSlug, slugParams } from '@/lib/collectionRoutes';
+import { isLocale } from '@/lib/i18n';
+import { localize } from '@/lib/sanity/localize';
 import {
   getPageByAnySlug,
   getPageBySlug,
@@ -11,14 +12,12 @@ import {
 import { buildMetadata } from '@/lib/seo';
 import { PageView } from '@/components/PageView';
 
+// Top-level pages have no route prefix. A folder in app/[locale]/ (e.g. services/) wins over
+// this route, so a page whose slug equals a preset route name is never reachable.
+const BASE = '';
+
 export async function generateStaticParams({ params }: { params: { locale: string } }) {
-  const { locale } = params;
-  if (!isLocale(locale)) return [];
-  const pages = await getPageSlugs();
-  return pages
-    .map((page) => localizeSlug(page.slug, locale))
-    .filter((slug): slug is string => Boolean(slug))
-    .map((slug) => ({ slug }));
+  return slugParams(await getPageSlugs(), params.locale);
 }
 
 export async function generateMetadata({
@@ -34,10 +33,7 @@ export async function generateMetadata({
     title: localize(page.title, locale),
     seo: page.seo,
     defaults: settings?.defaultSeo,
-    paths: pathsForAllLocales((lang) => {
-      const langSlug = localizeSlug(page.slug, lang);
-      return langSlug ? localePath(lang, `/${langSlug}`) : undefined;
-    }),
+    paths: detailPaths(BASE, page.slug),
   });
 }
 
@@ -46,13 +42,6 @@ export default async function Page({ params }: PageProps<'/[locale]/[slug]'>) {
   if (!isLocale(locale)) notFound();
 
   const page = await getPageBySlug(locale, slug);
-  if (page) return <PageView page={page} locale={locale} />;
-
-  // The slug may belong to the other language (e.g. the language switcher sent
-  // /en/tentang-kami): send the visitor to this language's slug for the same page.
-  const match = await getPageByAnySlug(slug);
-  const localizedSlug = match ? localizeSlug(match.slug, locale) : undefined;
-  if (localizedSlug && localizedSlug !== slug) redirect(localePath(locale, `/${localizedSlug}`));
-
-  notFound();
+  if (!page) return redirectToLocalizedSlug(locale, slug, BASE, getPageByAnySlug);
+  return <PageView page={page} locale={locale} />;
 }

@@ -21,6 +21,8 @@ interface BuildMetadataInput {
   locale: Locale;
   /** The document's own title, used when seo.metaTitle is empty. */
   title?: string;
+  /** The document's own summary/excerpt, used when seo.metaDescription is empty. */
+  description?: string;
   seo?: SeoValue | null;
   /** siteSettings.defaultSeo */
   defaults?: SeoValue | null;
@@ -32,13 +34,16 @@ interface BuildMetadataInput {
 export function buildMetadata({
   locale,
   title,
+  description: ownDescription,
   seo,
   defaults,
   paths,
 }: BuildMetadataInput): Metadata {
   const metaTitle = localize(seo?.metaTitle, locale) ?? title;
   const description =
-    localize(seo?.metaDescription, locale) ?? localize(defaults?.metaDescription, locale);
+    localize(seo?.metaDescription, locale) ??
+    ownDescription ??
+    localize(defaults?.metaDescription, locale);
   const ogImageSource = seo?.ogImage ?? defaults?.ogImage;
   const ogImage = ogImageSource?.asset
     ? urlForImage(ogImageSource).width(OG_IMAGE_WIDTH).height(OG_IMAGE_HEIGHT).fit('crop').url()

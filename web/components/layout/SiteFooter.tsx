@@ -1,17 +1,18 @@
 import { getDictionary, type Locale } from '@/lib/i18n';
-import type { ResolvedLink } from '@/lib/links';
+import { telHref, type ResolvedLink } from '@/lib/links';
 import { localize } from '@/lib/sanity/localize';
 import { Container } from '@/components/ui/Container';
 import { SiteLink } from '@/components/ui/SiteLink';
-import type { SITE_SETTINGS_QUERY_RESULT } from '@/sanity.types';
+import type { OFFICES_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '@/sanity.types';
 
 interface Props {
   locale: Locale;
   settings: NonNullable<SITE_SETTINGS_QUERY_RESULT>;
   links: ResolvedLink[];
+  offices: OFFICES_QUERY_RESULT;
 }
 
-export function SiteFooter({ locale, settings, links }: Props) {
+export function SiteFooter({ locale, settings, links, offices }: Props) {
   const t = getDictionary(locale);
   const footerText = localize(settings.footerText, locale);
   const disclaimer = localize(settings.disclaimer, locale);
@@ -33,6 +34,21 @@ export function SiteFooter({ locale, settings, links }: Props) {
               ))}
             </ul>
           </nav>
+        )}
+        {offices.length > 0 && (
+          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {offices.map((office) => (
+              <li key={office._id} className="flex flex-col gap-1">
+                <span className="font-medium text-ink">{localize(office.name, locale)}</span>
+                {office.address?.city && <span>{office.address.city}</span>}
+                {office.phone && (
+                  <a href={telHref(office.phone)} className="hover:text-ink">
+                    {office.phone}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
         {footerText && <p className="max-w-2xl">{footerText}</p>}
         {disclaimer && <p className="max-w-3xl text-xs">{disclaimer}</p>}

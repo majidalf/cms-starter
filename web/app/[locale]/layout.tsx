@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { defaultLocale, getDictionary, isLocale, locales } from '@/lib/i18n';
 import { resolveLinks } from '@/lib/links';
+import { getOffices } from '@/lib/sanity/collections/office';
 import { getNavigation, getSiteSettings } from '@/lib/sanity/queries';
 import { siteUrl } from '@/lib/site';
 import { SiteFooter } from '@/components/layout/SiteFooter';
@@ -32,7 +33,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   const { locale: requested } = await params;
   const locale = isLocale(requested) ? requested : defaultLocale;
 
-  const [settings, navigation] = await Promise.all([getSiteSettings(), getNavigation()]);
+  const [settings, navigation, offices] = await Promise.all([
+    getSiteSettings(),
+    getNavigation(),
+    getOffices(),
+  ]);
   if (!settings) {
     throw new Error(
       'Site settings are not published. Publish the "Site settings" document in Studio.',
@@ -61,6 +66,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
           locale={locale}
           settings={settings}
           links={resolveLinks(navigation?.footer, locale)}
+          offices={offices}
         />
       </body>
     </html>

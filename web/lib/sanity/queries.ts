@@ -1,6 +1,7 @@
 import { cache } from 'react';
 import { defineQuery } from 'groq';
 import { sanityClient } from './client';
+import { CREDENTIAL_VISIBLE } from './fragments';
 
 // Queries return every language; components pick one with localize(). Result types are
 // generated into sanity.types.ts by `npm run typegen` in studio/ - rerun it after changing
@@ -19,7 +20,12 @@ const PAGE_FIELDS = `
   sections[]{
     ...,
     _type == "heroSection" => { "ctas": ctas[]{ ${LINK_FIELDS} } },
-    _type == "ctaSection" => { "cta": cta{ ${LINK_FIELDS} } }
+    _type == "ctaSection" => { "cta": cta{ ${LINK_FIELDS} } },
+    _type == "credentialListSection" => {
+      "credentials": *[${CREDENTIAL_VISIBLE}] | order(order asc, year desc){
+        _id, title, issuer, year, logo
+      }
+    }
   }
 `;
 

@@ -20,6 +20,11 @@ export function safeHref(href: string | null | undefined): string | undefined {
   return href && SAFE_HREF.test(href) ? href : undefined;
 }
 
+/** "+62 21 0000 0000" -> "tel:+622100000000" */
+export function telHref(phone: string): string {
+  return `tel:${phone.replace(/[^\d+]/g, '')}`;
+}
+
 export interface ResolvedLink {
   key: string;
   label: string;

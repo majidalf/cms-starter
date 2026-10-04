@@ -1,4 +1,5 @@
 import type { Locale } from '@/lib/i18n';
+import { CredentialListSection } from './CredentialListSection';
 import { CtaSection } from './CtaSection';
 import { FeatureListSection } from './FeatureListSection';
 import { HeroSection } from './HeroSection';
@@ -38,6 +39,8 @@ export function SectionRenderer({ sections, locale }: Props) {
             return <FeatureListSection key={section._key} section={section} locale={locale} />;
           case 'imageTextSection':
             return <ImageTextSection key={section._key} section={section} locale={locale} />;
+          case 'credentialListSection':
+            return <CredentialListSection key={section._key} section={section} locale={locale} />;
           default:
             return null;
         }
