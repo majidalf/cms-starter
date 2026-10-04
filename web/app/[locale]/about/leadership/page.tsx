@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getPeople } from '@/lib/sanity/collections/person';
@@ -27,7 +27,11 @@ export default async function LeadershipPage({ params }: PageProps<'/[locale]/ab
 
   return (
     <>
-      <PageHeader title={t.leadership} />
+      <PageHeader
+        locale={locale}
+        path={localePath(locale, routes.leadership)}
+        title={t.leadership}
+      />
       <Container className="flex flex-col gap-16 pb-20">
         {groups.length === 0 && <p className="text-muted">{t.emptyList}</p>}
         {groups.map(({ group, people: members }) => (

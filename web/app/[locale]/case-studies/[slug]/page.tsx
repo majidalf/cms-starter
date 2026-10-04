@@ -56,6 +56,8 @@ export default async function CaseStudyPage({
   return (
     <article className="pb-16">
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={localize(caseStudy.title, locale) ?? ''}
         intro={localize(caseStudy.summary, locale)}
         back={{ href: localePath(locale, BASE), label: t.caseStudies }}

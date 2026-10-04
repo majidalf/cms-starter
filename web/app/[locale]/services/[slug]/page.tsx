@@ -61,6 +61,8 @@ export default async function ServicePage({ params }: PageProps<'/[locale]/servi
   return (
     <article className="pb-16">
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={localize(service.title, locale) ?? ''}
         intro={localize(service.summary, locale)}
         back={{ href: localePath(locale, BASE), label: t.services }}

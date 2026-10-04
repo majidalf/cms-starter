@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { detailPath, redirectToLocalizedSlug, slugParams } from '@/lib/collectionRoutes';
 import { formatDate, getDictionary, isLocale, localePath } from '@/lib/i18n';
+import { articleJsonLd } from '@/lib/jsonLd';
 import { safeHref } from '@/lib/links';
 import { detailPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
@@ -18,6 +19,8 @@ import { RelatedBlock } from '@/components/collections/RelatedBlock';
 import { RichText } from '@/components/collections/RichText';
 import { serviceEntries } from '@/components/collections/entries';
 import { Container } from '@/components/ui/Container';
+import { JsonLd } from '@/components/JsonLd';
+import { absoluteUrl, siteUrl } from '@/lib/site';
 
 const BASE = routes.insights;
 
@@ -60,9 +63,22 @@ export default async function InsightPage({ params }: PageProps<'/[locale]/insig
     return href && author.name ? [{ key: author._id, href, name: author.name }] : [];
   });
 
+  const structuredData = articleJsonLd({
+    headline: localize(insight.title, locale) ?? '',
+    url: absoluteUrl(localePath(locale, `${BASE}/${slug}`)),
+    datePublished: insight.publishedAt,
+    description: localize(insight.excerpt, locale),
+    language: locale,
+    authors: authors.map((author) => ({ name: author.name, url: absoluteUrl(author.href) })),
+    organizationUrl: siteUrl.origin,
+  });
+
   return (
     <article className="pb-16">
+      <JsonLd data={structuredData} />
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={localize(insight.title, locale) ?? ''}
         eyebrow={[category, date].filter(Boolean).join(' · ')}
         intro={localize(insight.excerpt, locale)}

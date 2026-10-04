@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getIndustries } from '@/lib/sanity/collections/industry';
@@ -20,7 +20,11 @@ export default async function IndustriesPage({ params }: PageProps<'/[locale]/in
 
   return (
     <>
-      <PageHeader title={t.industries} />
+      <PageHeader
+        locale={locale}
+        path={localePath(locale, routes.industries)}
+        title={t.industries}
+      />
       <Container className="pb-20">
         <EntryList entries={industryEntries(industries, locale)} emptyText={t.emptyList} />
       </Container>

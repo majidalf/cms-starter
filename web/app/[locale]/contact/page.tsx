@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { safeHref, telHref } from '@/lib/links';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
@@ -24,7 +24,7 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
 
   return (
     <>
-      <PageHeader title={t.contact}>
+      <PageHeader locale={locale} path={localePath(locale, routes.contact)} title={t.contact}>
         <dl className="flex flex-wrap gap-x-10 gap-y-2">
           {settings?.email && (
             <div>

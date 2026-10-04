@@ -1302,6 +1302,53 @@ export type PAGE_SLUGS_QUERY_RESULT = Array<{
   slug: LocaleSlug | null;
 }>;
 
+// Source: ../web/lib/sanity/sitemapQuery.ts
+// Variable: SITEMAP_QUERY
+// Query: {  "home": *[_id == "siteSettings"][0].homePage->{ _updatedAt, "noIndex": seo.noIndex },  "documents": *[    (      (_type == "page" && _id != *[_id == "siteSettings"][0].homePage._ref)      || _type in ["person", "service", "industry", "insight"]      || (_type == "caseStudy" && clientConsent == true)      || (_type == "jobOpening" && isOpen == true)    )    && defined(slug) && seo.noIndex != true  ]{ _type, slug, _updatedAt }}
+export type SITEMAP_QUERY_RESULT = {
+  home: {
+    _updatedAt: string;
+    noIndex: boolean | null;
+  } | null;
+  documents: Array<
+    | {
+        _type: "caseStudy";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "industry";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "insight";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "jobOpening";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "page";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "person";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+    | {
+        _type: "service";
+        slug: LocaleSlug | null;
+        _updatedAt: string;
+      }
+  >;
+};
+
 // Query TypeMap
 declare global {
   interface SanityQueries {
@@ -1336,6 +1383,7 @@ declare global {
     '*[\n  _type == "page" && slug[$locale] == $slug && _id != *[_id == "siteSettings"][0].homePage._ref\n][0]{ \n  _id, title, slug, seo,\n  sections[]{\n    ...,\n    _type == "heroSection" => { "ctas": ctas[]{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "ctaSection" => { "cta": cta{ \n  _key, label, linkType, path, url,\n  "pageSlug": page->slug,\n  "isHomePage": defined(page._ref) && page._ref == *[_id == "siteSettings"][0].homePage._ref\n } },\n    _type == "credentialListSection" => {\n      "credentials": *[_type == "credential" && approvedForDisplay == true] | order(coalesce(order, 9999) asc, year desc){\n        _id, title, issuer, year, logo\n      }\n    }\n  }\n }': PAGE_BY_SLUG_QUERY_RESULT;
     '*[\n  _type == "page" && $slug in [slug.id, slug.en] && _id != *[_id == "siteSettings"][0].homePage._ref\n][0]{ slug }': PAGE_BY_ANY_SLUG_QUERY_RESULT;
     '*[\n  _type == "page" && defined(slug) && _id != *[_id == "siteSettings"][0].homePage._ref\n]{ slug }': PAGE_SLUGS_QUERY_RESULT;
+    '{\n  "home": *[_id == "siteSettings"][0].homePage->{ _updatedAt, "noIndex": seo.noIndex },\n  "documents": *[\n    (\n      (_type == "page" && _id != *[_id == "siteSettings"][0].homePage._ref)\n      || _type in ["person", "service", "industry", "insight"]\n      || (_type == "caseStudy" && clientConsent == true)\n      || (_type == "jobOpening" && isOpen == true)\n    )\n    && defined(slug) && seo.noIndex != true\n  ]{ _type, slug, _updatedAt }\n}': SITEMAP_QUERY_RESULT;
   }
 }
 // Lets @sanity/client releases that predate the global registry read it too

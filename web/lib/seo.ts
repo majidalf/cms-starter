@@ -7,7 +7,7 @@ const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
 /** Only the production dataset may be indexed - staging content must never reach Google. */
-const isIndexable = process.env.NEXT_PUBLIC_SANITY_DATASET === 'production';
+export const isIndexable = process.env.NEXT_PUBLIC_SANITY_DATASET === 'production';
 
 export interface SeoValue {
   metaTitle?: Partial<Record<Locale, string | null>> | null;

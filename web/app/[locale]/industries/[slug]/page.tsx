@@ -54,6 +54,8 @@ export default async function IndustryPage({ params }: PageProps<'/[locale]/indu
   return (
     <article className="pb-16">
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={localize(industry.title, locale) ?? ''}
         intro={localize(industry.summary, locale)}
         back={{ href: localePath(locale, BASE), label: t.industries }}

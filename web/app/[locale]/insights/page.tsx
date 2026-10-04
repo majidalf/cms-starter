@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getInsights } from '@/lib/sanity/collections/insight';
@@ -20,7 +20,7 @@ export default async function InsightsPage({ params }: PageProps<'/[locale]/insi
 
   return (
     <>
-      <PageHeader title={t.insights} />
+      <PageHeader locale={locale} path={localePath(locale, routes.insights)} title={t.insights} />
       <Container className="pb-20">
         <EntryList entries={insightEntries(insights, locale)} emptyText={t.emptyList} />
       </Container>

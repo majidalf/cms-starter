@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { NextConfig } from 'next';
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 import { defaultLocale } from './lib/i18n';
+import { securityHeaders } from './lib/securityHeaders';
 
 // Gives `next dev` access to Cloudflare bindings (R2/D1) locally, matching what the
 // deployed Worker sees - without this, local dev can't exercise the incremental/tag cache.
@@ -24,6 +25,18 @@ const nextConfig: NextConfig = {
     // all resizing happens on Sanity's own image CDN instead. See lib/sanity/image.ts.
     loader: 'custom',
     loaderFile: './lib/sanity/imageLoader.ts',
+  },
+  async headers() {
+    return [
+      { source: '/:path*', headers: securityHeaders(process.env.NODE_ENV === 'development') },
+      {
+        // *.workers.dev serves preview versions and the default subdomain - never the
+        // client's domain - so keep it out of search results whatever the dataset.
+        source: '/:path*',
+        has: [{ type: 'host', value: String.raw`.*\.workers\.dev` }],
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+    ];
   },
   async redirects() {
     // Every page lives under a language prefix (app/[locale]). Not permanent, so the

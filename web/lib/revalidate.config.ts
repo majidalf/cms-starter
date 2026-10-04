@@ -65,8 +65,12 @@ export const revalidateMap: Record<string, Resolver> = {
   credential: wholeSite,
 };
 
+/** app/sitemap.ts lives outside /[locale], so no layout revalidation reaches it. Any publish
+ * can add, rename or hide a URL, so it is refreshed on every webhook. */
+const SITEMAP: RevalidateTarget = { path: '/sitemap.xml' };
+
 /** Unknown `_type`s fall back to revalidating everything: slower, but never stale. */
 export function resolveRevalidateTargets(payload: RevalidatePayload): RevalidateTarget[] {
   const resolver = (payload._type && revalidateMap[payload._type]) || wholeSite;
-  return resolver(payload);
+  return [...resolver(payload), SITEMAP];
 }

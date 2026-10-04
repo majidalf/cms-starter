@@ -1,8 +1,15 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { getDictionary, localePath, type Locale } from '@/lib/i18n';
+import { breadcrumbJsonLd } from '@/lib/jsonLd';
+import { absoluteUrl } from '@/lib/site';
 import { Container } from '@/components/ui/Container';
+import { JsonLd } from '@/components/JsonLd';
 
 interface Props {
+  locale: Locale;
+  /** This page's path (with language prefix), for the breadcrumb structured data. */
+  path: string;
   title: string;
   /** Small line above the title, e.g. a category or date. */
   eyebrow?: ReactNode;
@@ -12,10 +19,21 @@ interface Props {
   children?: ReactNode;
 }
 
-/** Top of every corporate preset page: the page's only <h1>. */
-export function PageHeader({ title, eyebrow, intro, back, children }: Props) {
+/** Top of every corporate preset page: the page's only <h1>, plus BreadcrumbList structured
+ * data (Home > list page > this page). */
+export function PageHeader({ locale, path, title, eyebrow, intro, back, children }: Props) {
+  const trail = [
+    { name: getDictionary(locale).home, path: localePath(locale) },
+    ...(back ? [{ name: back.label, path: back.href }] : []),
+    { name: title, path },
+  ];
+  const breadcrumbs = breadcrumbJsonLd(
+    trail.map((item) => ({ name: item.name, url: absoluteUrl(item.path) })),
+  );
+
   return (
     <Container className="flex flex-col gap-4 pb-8 pt-16 md:pt-24">
+      <JsonLd data={breadcrumbs} />
       {back && (
         <Link href={back.href} className="text-sm text-muted hover:text-ink">
           <span aria-hidden="true">← </span>

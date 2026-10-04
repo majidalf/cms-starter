@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getCaseStudies } from '@/lib/sanity/collections/caseStudy';
@@ -20,7 +20,11 @@ export default async function CaseStudiesPage({ params }: PageProps<'/[locale]/c
 
   return (
     <>
-      <PageHeader title={t.caseStudies} />
+      <PageHeader
+        locale={locale}
+        path={localePath(locale, routes.caseStudies)}
+        title={t.caseStudies}
+      />
       <Container className="pb-20">
         <EntryList entries={caseStudyEntries(caseStudies, locale)} emptyText={t.emptyList} />
       </Container>

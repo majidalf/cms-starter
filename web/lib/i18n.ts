@@ -59,6 +59,7 @@ const id = {
   notFoundBody: 'Halaman yang Anda cari tidak ada atau sudah dipindahkan.',
   backHome: 'Kembali ke beranda',
   emptyList: 'Belum ada konten untuk ditampilkan.',
+  home: 'Beranda',
 
   leadership: 'Kepemimpinan',
   services: 'Layanan',
@@ -132,6 +133,7 @@ const en: Dictionary = {
   notFoundBody: 'The page you are looking for does not exist or has moved.',
   backHome: 'Back to home',
   emptyList: 'Nothing to show yet.',
+  home: 'Home',
 
   leadership: 'Leadership',
   services: 'Services',

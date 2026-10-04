@@ -4,7 +4,7 @@ import { routes } from '@/lib/routes';
 import { getPersonBySlug } from '@/lib/sanity/collections/person';
 import { localize } from '@/lib/sanity/localize';
 import { getSiteSettings } from '@/lib/sanity/queries';
-import { siteUrl } from '@/lib/site';
+import { absoluteUrl } from '@/lib/site';
 import { buildVCard } from '@/lib/vcard';
 
 /** "Save contact" download for a person profile: /<locale>/about/leadership/<slug>/vcard. */
@@ -26,7 +26,7 @@ export async function GET(
     email: person.email ?? person.office?.email ?? undefined,
     phone: person.office?.phone ?? undefined,
     address: person.office?.address,
-    url: profilePath ? new URL(profilePath, siteUrl).toString() : undefined,
+    url: profilePath ? absoluteUrl(profilePath) : undefined,
   });
   // Slugs are validated as [a-z0-9-] in Studio; strip anything else anyway so the header
   // can't be broken by imported content.

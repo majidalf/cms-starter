@@ -57,6 +57,8 @@ export default async function JobOpeningPage({ params }: PageProps<'/[locale]/ca
   return (
     <article className="pb-16">
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={localize(opening.title, locale) ?? ''}
         back={{ href: localePath(locale, BASE), label: t.careers }}
       >

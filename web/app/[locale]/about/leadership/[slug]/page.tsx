@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { redirectToLocalizedSlug, slugParams } from '@/lib/collectionRoutes';
 import { getDictionary, isLocale, languageName, localePath } from '@/lib/i18n';
+import { personJsonLd } from '@/lib/jsonLd';
 import { safeHref } from '@/lib/links';
 import { detailPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
@@ -16,7 +17,9 @@ import { PageHeader } from '@/components/collections/PageHeader';
 import { RelatedBlock } from '@/components/collections/RelatedBlock';
 import { insightEntries, serviceEntries } from '@/components/collections/entries';
 import { PortableTextRenderer } from '@/components/PortableTextRenderer';
+import { JsonLd } from '@/components/JsonLd';
 import { SanityImage } from '@/components/SanityImage';
+import { absoluteUrl, siteUrl } from '@/lib/site';
 import { Container } from '@/components/ui/Container';
 
 const BASE = routes.leadership;
@@ -64,9 +67,22 @@ export default async function PersonPage({
   })).filter(({ items }) => items.length > 0);
   const languages = (person.languages ?? []).map((code) => languageName(code, locale));
 
+  const structuredData = personJsonLd({
+    name: person.name ?? '',
+    url: absoluteUrl(profilePath),
+    jobTitle: localize(person.position, locale),
+    email: person.email,
+    image: person.photo,
+    sameAs: [linkedin],
+    organizationUrl: siteUrl.origin,
+  });
+
   return (
     <article className="pb-16">
+      <JsonLd data={structuredData} />
       <PageHeader
+        locale={locale}
+        path={localePath(locale, `${BASE}/${slug}`)}
         title={person.name ?? ''}
         eyebrow={person.group ? t.personGroups[person.group] : undefined}
         intro={localize(person.position, locale)}
