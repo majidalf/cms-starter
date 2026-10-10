@@ -1,4 +1,4 @@
-import { expect, PAGE_PAIRS, PAGES, test } from './fixtures';
+import { DEFAULT_LANG, expect, PAGE_PAIRS, PAGES, test } from './fixtures';
 
 /* T3 features end to end: response headers, robots.txt, sitemap.xml and structured data. */
 
@@ -11,16 +11,16 @@ const SECURITY_HEADERS = [
   'permissions-policy',
 ];
 
-/** URLs from the seed that must never be public (CORPORATE_CLIENT_PLAN Section 5.1). */
-const HIDDEN_PATHS = [
-  '/id/case-studies/tata-kelola-perusahaan-energi',
-  '/en/case-studies/energy-company-governance',
-  '/id/careers/manajer-kepatuhan',
-  '/en/careers/compliance-manager',
-];
+/** URLs that must never be listed: sectors have no page of their own. */
+const HIDDEN_PATHS = ['/id/sectors/jasa-keuangan', '/en/sectors/financial-services'];
 
 test.describe('response headers', () => {
-  for (const path of ['/id', '/en/services/risk-management', '/sitemap.xml', '/robots.txt']) {
+  for (const path of [
+    '/id',
+    '/en/practice-areas/corporate-commercial-law',
+    '/sitemap.xml',
+    '/robots.txt',
+  ]) {
     test(`security headers on ${path}`, async ({ request }) => {
       const response = await request.get(path);
       expect(response.status()).toBe(200);
@@ -65,7 +65,11 @@ test.describe('sitemap.xml', () => {
   test('lists every page with the same alternates as its hreflang', async ({ request }) => {
     const sitemap = await readSitemap(request);
     for (const { path, pair } of PAGES) {
-      expect(sitemap.get(path), path).toEqual({ id: pair.id, en: pair.en, 'x-default': pair.id });
+      expect(sitemap.get(path), path).toEqual({
+        id: pair.id,
+        en: pair.en,
+        'x-default': pair[DEFAULT_LANG],
+      });
     }
   });
 

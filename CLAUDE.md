@@ -15,6 +15,14 @@ OpenNext, content from a standalone Sanity Studio. Bilingual (Indonesian default
   Worker name `cms-starter` in `web/wrangler.jsonc` (kept valid on purpose - `next build` validates
   that file).
 
+- This branch is the Harianja & Putra client site, built to match
+  `E:\DESIGN\HAIRANJA & PUTRA - LAW FIRM\Design.pen`. Client content is the seed in
+  `studio/seed/harianja/` (edit `content.mjs`, then `node seed/harianja/build.mjs`). To preview
+  it without a dataset: `cd web && npm run sanity:mock`, set
+  `NEXT_PUBLIC_SANITY_LOCAL_HOST=http://localhost:3999` in `web/.env.development.local`, then
+  `npm run dev`. Decisions D-14 to D-20 in the plan explain where the site departs from the
+  design frames.
+
 ## Checks before committing
 
 ```bash
@@ -27,7 +35,10 @@ imported): `cd web && npm run test:e2e` (Playwright + axe) and `npm run lhci` (L
 set `CHROME_PATH` to a Chrome/Chromium binary). These default to `next start`; before
 committing routing or caching changes, run them on the Worker runtime as CI does:
 `npm run cf:build`, then `E2E_SERVER=worker npm run test:e2e` - OpenNext behaves differently
-from `next start` (see `components/layout/LanguageSwitcher.tsx`).
+from `next start` (see `components/layout/LanguageSwitcher.tsx`). While the seed is not in a
+dataset yet, `E2E_BASE_URL=http://localhost:3000 npm run test:e2e` runs the suite against
+`next dev` + the mock; the four response-header tests fail there because dev mode needs
+`unsafe-eval`.
 
 Install scripts are allowed per exact version (`allowScripts` in `web/package.json`,
 decision D-9). After upgrading `workerd` or `esbuild`, review the new script and lockfile

@@ -35,13 +35,13 @@ describe('buildMetadata', () => {
     const meta = buildMetadata({ locale: 'en', title: 'X', paths });
     expect(meta.alternates).toEqual({
       canonical: '/en/services',
-      languages: { id: '/id/layanan', en: '/en/services', 'x-default': '/id/layanan' },
+      languages: { id: '/id/layanan', en: '/en/services', 'x-default': '/en/services' },
     });
   });
 
   it('leaves out a language without a path, and x-default with it', () => {
-    const meta = buildMetadata({ locale: 'en', title: 'X', paths: { en: '/en/only' } });
-    expect(meta.alternates?.languages).toEqual({ en: '/en/only' });
+    const meta = buildMetadata({ locale: 'id', title: 'X', paths: { id: '/id/saja' } });
+    expect(meta.alternates?.languages).toEqual({ id: '/id/saja' });
   });
 
   it('uses the per-language canonical URL when set', () => {

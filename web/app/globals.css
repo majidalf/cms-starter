@@ -1,16 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Public+Sans:ital,wght@0,300..700;1,300..700&display=swap');
 @import 'tailwindcss';
-@plugin '@tailwindcss/typography';
 
 /*
- * Harianja & Putra Law Firm — design tokens.
- * Source: design/Design.pen (00 Foundations).
- * Tailwind 4 has no tailwind.config.ts - every token lives here.
- * Legacy aliases (surface / ink / muted / brand / accent) are kept so
- * existing sections keep working; they map onto the law-firm palette.
+ * Harianja & Putra design tokens, from Design.pen → 00 Foundations (variables).
+ * Tailwind 4 has no tailwind.config.ts - every token lives here. Fonts are loaded with
+ * next/font in app/[locale]/layout.tsx (self-hosted, so the CSP needs no font origin).
  */
-@theme {
-  /* Law-firm palette */
+@theme inline {
   --color-navy-950: #081426;
   --color-navy-900: #0b1b34;
   --color-navy-800: #16294a;
@@ -19,41 +14,40 @@
 
   --color-paper: #ece8df;
   --color-paper-hi: #f7f6f2;
-
-  --color-on-navy: #e9ecf2;
-  --color-on-navy-2: #a7b1c4;
+  --color-paper-pressed: #d9d3c6;
 
   --color-brass: #d99a2b;
   --color-brass-light: #e8b65a;
   --color-bronze: #8a5a14;
 
+  --color-on-navy: #e9ecf2;
+  --color-on-navy-2: #a7b1c4;
+  --color-ink: #0b1b34;
   --color-ink-2: #4a5468;
+
+  --color-gridline: #e9ecf20d; /* frame: 12 (7%); owner asked for 30% lighter */
   --color-line-navy: #2e4a78;
-  --color-gridline: #e9ecf212;
   --color-field-border: #5f7299;
   --color-focus-ring: #e8b65a;
+  --color-error: #f5a3a3;
+  --color-success: #8fd3a8;
+  --color-chip: #e9ecf214;
 
-  /* Legacy aliases -> law-firm palette */
-  --color-surface: var(--color-paper-hi);
-  --color-ink: var(--color-navy-900);
-  --color-muted: var(--color-ink-2);
-  --color-brand: var(--color-navy-900);
-  --color-accent: var(--color-brass);
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-caslon-text), ui-serif, Georgia, serif;
+  --font-display: var(--font-caslon-display), var(--font-caslon-text), ui-serif, Georgia, serif;
 
-  /* Type */
-  --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-serif: 'Libre Caslon Text', ui-serif, Georgia, serif;
-  --font-display: 'Libre Caslon Display', 'Libre Caslon Text', ui-serif, Georgia, serif;
-
-  /* Shape */
-  --radius-card: 16px;
   --radius-panel: 20px;
+  --radius-card: 16px;
   --radius-photo: 12px;
+  --radius-control: 2px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
-  background-color: var(--color-surface);
-  color: var(--color-ink);
+  background-color: var(--color-navy-950);
+  color: var(--color-on-navy);
 }
 
 ::selection {
@@ -61,28 +55,140 @@ body {
   color: var(--color-navy-950);
 }
 
-/* Keyboard focus: visible, consistent, on-brand (ux priority 1). */
+/* States board: every control gets the same ring - 2px, 3px offset, brass on navy. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 3px;
 }
 
-/* Respect reduced motion: no smooth scroll, no transitions (ux priority 7). */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+/* On the paper panel the ring is navy (14:1) instead of brass. */
+.on-paper :focus-visible {
+  outline-color: var(--color-navy-900);
+}
+
+/* The home page frame uses 40px side padding where inner pages use 20px; the footer follows
+ * the page it is on. */
+@media (width >= 64rem) {
+  body:has([data-home]) .site-footer {
+    padding-inline: 40px;
   }
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+}
+
+/* Consent checkbox: a paper box with a navy tick when checked. */
+.consent-check:checked {
+  background-color: var(--color-paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4.5 9.5l3 3 6-7' fill='none' stroke='%230B1B34' stroke-width='2'/%3E%3C/svg%3E");
+  outline-color: var(--color-paper);
+}
+
+/* Motion Notes → Hero: the headline rises word by word. */
+@keyframes word-rise {
+  from {
+    opacity: 0.35;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-photo {
+  from {
+    transform: scale(1.06);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Motion Notes → Tentang: the statement fills in word by word, dim to on-navy. */
+@keyframes word-fill {
+  from {
+    color: #55627b;
+  }
+  to {
+    color: var(--color-on-navy);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
+  }
+
+  .word-rise {
+    display: inline-block;
+    animation: word-rise 900ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 80ms);
+  }
+
+  .hero-photo {
+    animation: hero-photo 1400ms var(--ease-out-expo) both;
+  }
+
+  /* Fact cards: rise 16px and fade, 100ms apart, when they scroll into view. */
+  @supports (animation-timeline: view()) {
+    .rise-in {
+      animation: rise-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .scroll-fill {
+      view-timeline-name: --scroll-fill;
+    }
+
+    .scroll-fill > span[aria-hidden] {
+      animation: word-fill linear both;
+      animation-timeline: --scroll-fill;
+      animation-range: cover calc(12% + var(--p) * 28%) cover calc(18% + var(--p) * 28%);
+    }
+
+    .rise-in {
+      animation-range: entry calc(var(--i, 0) * 12%) entry calc(60% + var(--i, 0) * 12%);
+    }
+  }
+
+  .panel-fade {
+    animation: fade-in 150ms ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

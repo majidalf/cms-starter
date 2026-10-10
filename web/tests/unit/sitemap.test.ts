@@ -46,16 +46,16 @@ describe('buildSitemap', () => {
       siteUrl,
     );
     const entry = entries.find(
-      (e) => e.url === 'https://www.example.com/en/services/risk-management',
+      (e) => e.url === 'https://www.example.com/en/practice-areas/risk-management',
     );
     expect(entry).toEqual({
-      url: 'https://www.example.com/en/services/risk-management',
+      url: 'https://www.example.com/en/practice-areas/risk-management',
       lastModified: '2026-05-01T10:00:00Z',
       alternates: {
         languages: {
-          id: 'https://www.example.com/id/services/manajemen-risiko',
-          en: 'https://www.example.com/en/services/risk-management',
-          'x-default': 'https://www.example.com/id/services/manajemen-risiko',
+          id: 'https://www.example.com/id/practice-areas/manajemen-risiko',
+          en: 'https://www.example.com/en/practice-areas/risk-management',
+          'x-default': 'https://www.example.com/en/practice-areas/risk-management',
         },
       },
     });

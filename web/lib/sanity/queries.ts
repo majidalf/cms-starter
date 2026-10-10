@@ -16,7 +16,7 @@ const LINK_FIELDS = `
 `;
 
 const PAGE_FIELDS = `
-  _id, title, slug, seo,
+  _id, _updatedAt, title, slug, seo,
   sections[]{
     ...,
     _type == "heroSection" => { "ctas": ctas[]{ ${LINK_FIELDS} } },
@@ -36,7 +36,8 @@ export const SITE_SETTINGS_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
 
 export const NAVIGATION_QUERY = defineQuery(`*[_id == "navigation"][0]{
   "header": header[]{ ${LINK_FIELDS} },
-  "footer": footer[]{ ${LINK_FIELDS} }
+  "footer": footer[]{ ${LINK_FIELDS} },
+  "legal": legal[]{ ${LINK_FIELDS} }
 }`);
 
 export const HOME_PAGE_QUERY = defineQuery(

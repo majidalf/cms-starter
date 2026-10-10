@@ -5,9 +5,9 @@
       "startServerReadyPattern": "Ready",
       "url": [
         "http://localhost:3100/en",
-        "http://localhost:3100/en/services/risk-management",
-        "http://localhost:3100/en/about/leadership/ratna-wulandari",
-        "http://localhost:3100/en/insights/risk-appetite-statement"
+        "http://localhost:3100/en/practice-areas/corporate-commercial-law",
+        "http://localhost:3100/en/partners/zico-fernando",
+        "http://localhost:3100/en/insights/preparing-a-debt-claim-before-sending-a-demand-letter"
       ],
       "numberOfRuns": 3,
       "settings": {

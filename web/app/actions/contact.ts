@@ -1,30 +1,30 @@
 'use server';
 
 import { Resend } from 'resend';
+import { defaultLocale, getDictionary, isLocale } from '@/lib/i18n';
 import {
   contactSchema,
+  firstErrors,
   formDataToContactInput,
-  type ContactFieldErrors,
+  type ContactField,
 } from '@/lib/contact/schema';
 
 /** Serializable result consumed by `useActionState` in the contact form. */
 export interface ContactActionState {
-  ok: boolean;
-  message: string;
-  fieldErrors?: ContactFieldErrors;
+  status: 'idle' | 'error' | 'success';
+  /** Form-level message, already in the visitor's language. */
+  message?: string;
+  /** Field-level messages, already in the visitor's language. */
+  fieldErrors?: Partial<Record<ContactField, string>>;
 }
-
-export const contactInitialState: ContactActionState = { ok: false, message: '' };
 
 interface TurnstileVerifyResponse {
   success: boolean;
-  'error-codes'?: string[];
 }
 
 /** Verifies the Turnstile token against Cloudflare's siteverify endpoint. */
-async function verifyTurnstile(token: string): Promise<boolean> {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return false;
+async function verifyTurnstile(secret: string, token: string): Promise<boolean> {
+  if (!token) return false;
   try {
     const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST',
@@ -40,49 +40,70 @@ async function verifyTurnstile(token: string): Promise<boolean> {
 }
 
 /**
- * Validates the form, verifies the Turnstile token, and delivers the message
- * via Resend. Every failure returns a shaped state (never throws) so the form
- * can render it; the action stays unauthenticated by design (public form) and
- * treats all input as untrusted.
+ * Validates the form, verifies the Turnstile token, and delivers the message via Resend.
+ * Every failure returns a shaped state (never throws) so the form can render it. The action
+ * is public by design, so it treats all input as untrusted and refuses to send unless the
+ * spam check is configured and passes.
  */
 export async function submitContact(
-  _prevState: ContactActionState,
+  _previous: ContactActionState,
   formData: FormData,
 ): Promise<ContactActionState> {
+  const requested = formData.get('locale');
+  const locale = typeof requested === 'string' && isLocale(requested) ? requested : defaultLocale;
+  const t = getDictionary(locale).contactForm;
+  const errorText = t.errors as Record<string, string>;
+
+  // Honeypot: a real visitor never sees or fills this field. Answer as if it worked.
+  if (formData.get('website')) return { status: 'success' };
+
   const parsed = contactSchema.safeParse(formDataToContactInput(formData));
   if (!parsed.success) {
+    const codes = firstErrors(parsed.error);
     return {
-      ok: false,
-      message: 'Please fix the highlighted fields and try again.',
-      fieldErrors: parsed.error.flatten().fieldErrors,
+      status: 'error',
+      message: t.errors.fix,
+      fieldErrors: Object.fromEntries(
+        Object.entries(codes).map(([field, code]) => [field, errorText[code] ?? t.errors.fix]),
+      ),
     };
   }
-  const { name, email, message, turnstileToken } = parsed.data;
+  const { name, email, company, practiceArea, message, turnstileToken } = parsed.data;
 
-  if (!(await verifyTurnstile(turnstileToken))) {
-    return { ok: false, message: 'Spam check failed. Please try again.' };
-  }
-
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
   const from = process.env.CONTACT_FROM_EMAIL;
-  if (!apiKey || !to || !from) {
-    return { ok: false, message: 'The contact form is not configured. Please try again later.' };
+  if (!turnstileSecret || !apiKey || !to || !from) {
+    return { status: 'error', message: t.errors.notConfigured };
   }
+  if (!(await verifyTurnstile(turnstileSecret, turnstileToken))) {
+    return { status: 'error', message: t.errors.spamCheck };
+  }
+
+  const lines = [
+    `Name: ${name}`,
+    `Email: ${email}`,
+    company ? `Company: ${company}` : undefined,
+    practiceArea ? `Practice area: ${practiceArea}` : undefined,
+    `Language: ${locale}`,
+    '',
+    message,
+  ].filter((line): line is string => line !== undefined);
 
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from,
       to,
-      subject: `New contact message from ${name}`,
+      subject: `Website enquiry from ${name}`,
       replyTo: email,
-      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+      text: lines.join('\n'),
     });
-    if (error) return { ok: false, message: 'Could not send your message. Please try again.' };
+    if (error) return { status: 'error', message: t.errors.failed };
   } catch {
-    return { ok: false, message: 'Could not send your message. Please try again.' };
+    return { status: 'error', message: t.errors.failed };
   }
 
-  return { ok: true, message: 'Thank you! Your message has been sent.' };
+  return { status: 'success' };
 }

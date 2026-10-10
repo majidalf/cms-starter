@@ -23,4 +23,21 @@ export const sanityClient = createClient({
   dataset,
   apiVersion,
   useCdn: false,
+  ...localHostConfig(),
 });
+
+/** Development only: `NEXT_PUBLIC_SANITY_LOCAL_HOST` points the client at
+ * scripts/mock-sanity.mjs, which serves a seed file without importing it into a dataset. */
+function localHostConfig() {
+  const host = sanityLocalHost();
+  return host ? { apiHost: host, useProjectHostname: false } : {};
+}
+
+export function sanityLocalHost(): string | undefined {
+  const host = process.env.NEXT_PUBLIC_SANITY_LOCAL_HOST;
+  if (!host) return undefined;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('NEXT_PUBLIC_SANITY_LOCAL_HOST is for local development only.');
+  }
+  return host;
+}

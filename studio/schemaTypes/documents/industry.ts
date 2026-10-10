@@ -5,7 +5,6 @@ import {
   orderField,
   seoField,
   slugField,
-  summaryField,
   titleAndSlugPreview,
   titleField,
 } from './shared'
@@ -23,7 +22,13 @@ export default defineType({
   fields: [
     titleField,
     slugField,
-    summaryField,
+    defineField({
+      name: 'summary',
+      title: 'Summary',
+      type: 'localeText',
+      group: 'content',
+      description: 'One or two sentences. Optional: the site lists sectors by name.',
+    }),
     defineField({name: 'body', title: 'Body', type: 'localeBlockContent', group: 'content'}),
     {...orderField, group: 'content'},
     seoField,

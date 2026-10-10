@@ -1,151 +1,172 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale, localePath } from '@/lib/i18n';
+import { getDictionary, isLocale, localePath, type Dictionary, type Locale } from '@/lib/i18n';
 import { safeHref, telHref } from '@/lib/links';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getOffices } from '@/lib/sanity/collections/office';
-import { localize } from '@/lib/sanity/localize';
+import { getServices } from '@/lib/sanity/collections/service';
+import { localize, localizeList } from '@/lib/sanity/localize';
 import { getSiteSettings } from '@/lib/sanity/queries';
-import { AddressLines } from '@/components/collections/AddressLines';
-import { PageHeader } from '@/components/collections/PageHeader';
-import { Container } from '@/components/ui/Container';
-import { ContactForm } from '@/components/forms/ContactForm';
+import { ContactPanel } from '@/components/contact/ContactPanel';
+import { PageHeader } from '@/components/sections/PageHeader';
+import { UnderlineLink } from '@/components/ui/UnderlineLink';
+import type { OFFICES_QUERY_RESULT } from '@/sanity.types';
 
-// The contact form is the optional `contact-form` module (plan Section 5.5, phase T5).
-
-export function generateMetadata({ params }: PageProps<'/[locale]/contact'>) {
+export function generateMetadata({ params }: PageProps<'/[locale]/contact'>): Promise<Metadata> {
   return listPageMetadata(params, routes.contact, (t) => t.contact);
 }
 
+interface RowProps {
+  label: string;
+  value?: string | null;
+  placeholder?: string;
+  href?: string;
+}
+
+function OfficeRow({ label, value, placeholder, href }: RowProps) {
+  const text = value || placeholder;
+  if (!text) return null;
+  return (
+    <div className="flex flex-col gap-[3px] border-t border-line-navy py-3 last:border-b lg:flex-row lg:gap-6 lg:py-[14px]">
+      <dt className="text-[12px] leading-[14px] text-on-navy-2 lg:w-[100px] lg:shrink-0 lg:text-[14px] lg:leading-[20px]">
+        {label}
+      </dt>
+      <dd
+        className={`whitespace-pre-line text-[16px] leading-[19px] lg:text-[17px] lg:leading-[20px] ${
+          value ? 'text-on-navy' : 'text-on-navy-2'
+        }`}
+      >
+        {href && value ? (
+          <a href={href} className="transition-colors hover:text-brass-light">
+            {value}
+          </a>
+        ) : (
+          text
+        )}
+      </dd>
+    </div>
+  );
+}
+
+interface OfficeCardProps {
+  office: OFFICES_QUERY_RESULT[number];
+  locale: Locale;
+  labels: Dictionary['contactPage'];
+  fallbackEmail?: string | null;
+  fallbackPhone?: string | null;
+}
+
+/** Office card (Design.pen → Contact → Offices): kind, city, map area and four ruled rows.
+ * Until an address and hours are entered, the rows say so. */
+function OfficeCard({ office, locale, labels, fallbackEmail, fallbackPhone }: OfficeCardProps) {
+  const address = office.address;
+  const street = [
+    address?.street,
+    [address?.city, address?.province, address?.postalCode].filter(Boolean).join(', '),
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const mapHref = safeHref(address?.mapUrl);
+  const phone = office.phone ?? fallbackPhone;
+  const email = office.email ?? fallbackEmail;
+
+  return (
+    <article className="flex flex-1 flex-col gap-5 rounded-panel bg-navy-900 p-5 lg:gap-7 lg:p-7">
+      <div className="flex flex-col gap-[6px] lg:gap-2">
+        <p className="text-[13px] leading-[15px] text-brass-light lg:text-[14px] lg:leading-[17px]">
+          {localize(office.kind, locale)}
+        </p>
+        <h2 className="font-display text-[40px] leading-[42px] text-on-navy lg:text-[56px] lg:leading-[59px] lg:tracking-[-0.6px]">
+          {localize(office.name, locale)}
+        </h2>
+      </div>
+      <div className="flex h-[140px] items-center justify-center rounded-photo bg-navy-800 px-4 text-center lg:h-[200px]">
+        {mapHref ? (
+          <UnderlineLink href={mapHref} size="md" icon="arrowUpRight" external>
+            {labels.viewMap}
+          </UnderlineLink>
+        ) : (
+          <p className="text-[12px] leading-[14px] text-on-navy-2 lg:text-[13px] lg:leading-[15px]">
+            {labels.mapNote}
+          </p>
+        )}
+      </div>
+      <dl className="flex flex-col">
+        <OfficeRow
+          label={labels.address}
+          value={address?.street ? street : undefined}
+          placeholder={labels.addressToFollow}
+        />
+        <OfficeRow label={labels.phone} value={phone} href={phone ? telHref(phone) : undefined} />
+        <OfficeRow
+          label={labels.email}
+          value={email}
+          href={email ? `mailto:${email}` : undefined}
+        />
+        <OfficeRow
+          label={labels.hours}
+          value={localize(office.hours, locale)}
+          placeholder={labels.toBeProvided}
+        />
+      </dl>
+    </article>
+  );
+}
+
 /**
- * Contact (design/Design.pen -> Contact · Desktop 1440): breadcrumb header,
- * office cards on navy-900 with a map placeholder, and the inquiry form in a
- * navy-800 panel next to the direct contact details.
+ * Contact (Design.pen → Contact · Desktop 1440 / Mobile 375): header, one card per office,
+ * then the same contact panel and form as the home page.
  */
 export default async function ContactPage({ params }: PageProps<'/[locale]/contact'>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+
+  const [settings, offices, services] = await Promise.all([
+    getSiteSettings(),
+    getOffices(),
+    getServices(),
+  ]);
   const t = getDictionary(locale);
-  const [settings, offices] = await Promise.all([getSiteSettings(), getOffices()]);
-  const direct = [
-    settings?.email && { href: `mailto:${settings.email}`, label: settings.email },
-    settings?.phone && { href: telHref(settings.phone), label: settings.phone },
-  ].filter((item): item is { href: string; label: string } => Boolean(item));
 
   return (
-    <div className="bg-navy-950 text-on-navy">
+    <>
       <PageHeader
-        locale={locale}
-        path={localePath(locale, routes.contact)}
+        breadcrumbLabel={t.breadcrumb}
+        breadcrumb={[{ label: t.homeLabel, href: localePath(locale) }, { label: t.contact }]}
+        label={t.contactPage.label}
         title={t.contactPage.heading}
-        eyebrow={t.contact}
-        intro={t.contactPage.lead}
+        titleSize="xl"
+        lead={t.contactPage.lead}
+        spacing="pb-10 lg:pb-20"
       />
-
       {offices.length > 0 && (
-        <section aria-labelledby="offices" className="pb-4 pt-4 md:pb-8">
-          <Container>
-            <h2 id="offices" className="sr-only">
-              {t.offices}
-            </h2>
-            <ul className="grid gap-6 md:grid-cols-2">
-              {offices.map((office) => {
-                const mapUrl = safeHref(office.address?.mapUrl);
-                return (
-                  <li
-                    key={office._id}
-                    className="flex flex-col gap-5 rounded-panel border border-on-navy/15 bg-navy-900 p-8"
-                  >
-                    <h3 className="font-serif text-2xl text-on-navy">
-                      {localize(office.name, locale)}
-                    </h3>
-                    <div className="flex min-h-28 items-center justify-center rounded-card bg-navy-800 px-6 py-8 text-center text-sm text-on-navy-2">
-                      {mapUrl ? (
-                        <a
-                          href={mapUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-4 hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                        >
-                          {t.viewMap}
-                        </a>
-                      ) : (
-                        t.contactPage.mapNote
-                      )}
-                    </div>
-                    <dl className="flex flex-col gap-3 text-sm">
-                      <div className="flex gap-3">
-                        <dt className="w-16 shrink-0 text-on-navy-2">{t.location}</dt>
-                        <dd>
-                          <AddressLines address={office.address} className="text-on-navy" />
-                        </dd>
-                      </div>
-                      {office.phone && (
-                        <div className="flex gap-3">
-                          <dt className="w-16 shrink-0 text-on-navy-2">{t.phone}</dt>
-                          <dd>
-                            <a
-                              href={telHref(office.phone)}
-                              className="text-on-navy underline underline-offset-2 hover:text-brass-light"
-                            >
-                              {office.phone}
-                            </a>
-                          </dd>
-                        </div>
-                      )}
-                      {office.email && (
-                        <div className="flex gap-3">
-                          <dt className="w-16 shrink-0 text-on-navy-2">{t.email}</dt>
-                          <dd>
-                            <a
-                              href={`mailto:${office.email}`}
-                              className="text-on-navy underline underline-offset-2 hover:text-brass-light"
-                            >
-                              {office.email}
-                            </a>
-                          </dd>
-                        </div>
-                      )}
-                    </dl>
-                  </li>
-                );
-              })}
-            </ul>
-          </Container>
+        <section className="relative mx-auto flex w-full max-w-[1440px] flex-col gap-3 px-3 pb-3 lg:flex-row lg:gap-4 lg:px-5 lg:pb-4">
+          {offices.map((office) => (
+            <OfficeCard
+              key={office._id}
+              office={office}
+              locale={locale}
+              labels={t.contactPage}
+              fallbackEmail={settings?.email}
+              fallbackPhone={settings?.phone}
+            />
+          ))}
         </section>
       )}
-
-      <section aria-labelledby="contact-form-heading" className="py-12 md:py-16">
-        <Container>
-          <div className="grid gap-10 rounded-panel bg-navy-800 p-8 md:p-12 lg:grid-cols-2">
-            <div className="flex flex-col items-start gap-5">
-              <h2
-                id="contact-form-heading"
-                className="font-display text-3xl leading-tight tracking-tight text-balance text-on-navy md:text-4xl"
-              >
-                {t.contactPage.formHeading}
-              </h2>
-              <p className="max-w-xl leading-relaxed text-on-navy-2">{t.contactPage.formLead}</p>
-              {direct.length > 0 && (
-                <ul className="flex flex-col gap-2 text-on-navy">
-                  {direct.map((item) => (
-                    <li key={item.href}>
-                      <a
-                        href={item.href}
-                        className="underline underline-offset-4 hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                      >
-                        → {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <ContactForm locale={locale} />
-          </div>
-        </Container>
-      </section>
-      <div className="pb-8" />
-    </div>
+      <ContactPanel
+        locale={locale}
+        email={settings?.email}
+        phone={settings?.phone}
+        offices={offices}
+        practiceAreas={localizeList(
+          services.map((service) => service.title),
+          locale,
+        )}
+        inset="page"
+        id="form"
+      />
+      <div aria-hidden="true" className="h-14 lg:h-20" />
+    </>
   );
 }

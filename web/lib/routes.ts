@@ -9,12 +9,11 @@
  */
 export const routes = {
   about: '/about',
-  leadership: '/about/leadership',
-  services: '/services',
-  industries: '/industries',
-  caseStudies: '/case-studies',
+  leadership: '/partners',
+  services: '/practice-areas',
+  industries: '/sectors',
+  caseStudies: '/experience',
   insights: '/insights',
-  careers: '/careers',
   contact: '/contact',
 } as const;
 

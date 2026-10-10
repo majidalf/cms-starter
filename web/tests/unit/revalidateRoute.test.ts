@@ -12,7 +12,7 @@ vi.mock('@/lib/sanity/revision', () => ({ waitForRevision }));
 const { POST } = await import('@/app/api/revalidate/route');
 
 const SECRET = 'test-secret';
-const payload = { _id: 'service-risk', _rev: 'r1', _type: 'jobOpening', operation: 'update' };
+const payload = { _id: 'service-risk', _rev: 'r1', _type: 'caseStudy', operation: 'update' };
 
 async function signedRequest(body: string, secret = SECRET) {
   const signature = await encodeSignatureHeader(body, Date.now(), secret);
@@ -36,7 +36,7 @@ describe('POST /api/revalidate', () => {
     expect(res.status).toBe(200);
     expect(waitForRevision).toHaveBeenCalledWith('service-risk', 'r1', 'update');
     expect(revalidatePath.mock.calls).toEqual([
-      ['/[locale]/careers', 'layout'],
+      ['/[locale]/experience', 'layout'],
       ['/sitemap.xml', undefined],
     ]);
   });

@@ -19,8 +19,8 @@ describe('isLocale', () => {
     for (const value of ['fr', 'ID', 'id-ID', '', 'about']) expect(isLocale(value)).toBe(false);
   });
 
-  it('has Indonesian as the default locale', () => {
-    expect(defaultLocale).toBe('id');
+  it('has English as the default locale (decision D-14)', () => {
+    expect(defaultLocale).toBe('en');
   });
 });
 

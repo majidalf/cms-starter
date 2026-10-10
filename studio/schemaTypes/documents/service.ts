@@ -22,6 +22,42 @@ export default defineType({
     titleField,
     slugField,
     summaryField,
+    defineField({
+      name: 'scope',
+      title: 'What we handle',
+      type: 'array',
+      group: 'content',
+      description: 'One line per kind of work.',
+      of: [
+        defineArrayMember({
+          name: 'scopeItem',
+          title: 'Item',
+          type: 'object',
+          fields: [
+            defineField({name: 'text', title: 'Text', type: 'requiredLocaleString'}),
+            defineField({
+              name: 'featured',
+              title: 'Show on the home page',
+              type: 'boolean',
+              initialValue: false,
+              description: 'The home page panel lists up to three featured items.',
+            }),
+          ],
+          preview: {
+            select: {title: 'text.id', featured: 'featured'},
+            prepare: ({title, featured}) => ({title, subtitle: featured ? 'Home page' : undefined}),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: 'legalBasis',
+      title: 'Legal basis',
+      type: 'array',
+      group: 'content',
+      description: 'Short citations, e.g. "Law 40/2007 · Limited Liability Companies".',
+      of: [defineArrayMember({type: 'requiredLocaleString'})],
+    }),
     defineField({name: 'body', title: 'Body', type: 'localeBlockContent', group: 'content'}),
     {...orderField, group: 'content'},
     defineField({

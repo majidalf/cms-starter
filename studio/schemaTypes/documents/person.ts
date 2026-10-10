@@ -27,6 +27,13 @@ export default defineType({
       group: 'content',
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: 'titles',
+      title: 'Titles after the name',
+      type: 'string',
+      group: 'content',
+      description: 'Academic and professional titles, e.g. "S.H., M.H.". Shown after the name.',
+    }),
     {...slugField, description: 'Usually the same name-based slug in every language.'},
     defineField({
       name: 'position',
@@ -44,6 +51,28 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({name: 'photo', title: 'Photo', type: 'imageWithAlt', group: 'content'}),
+    defineField({
+      name: 'summary',
+      title: 'Summary',
+      type: 'localeText',
+      group: 'content',
+      description: 'One or two sentences on what this person handles. Shown on cards.',
+    }),
+    defineField({
+      name: 'statement',
+      title: 'Profile statement',
+      type: 'localeText',
+      group: 'content',
+      description: 'The large sentence at the top of the profile. Leave empty to use the summary.',
+    }),
+    defineField({
+      name: 'focusAreas',
+      title: 'Focus tags',
+      type: 'array',
+      group: 'content',
+      description: 'Short labels on the card, e.g. "Corporate", "M&A".',
+      of: [defineArrayMember({type: 'requiredLocaleString'})],
+    }),
     defineField({name: 'bio', title: 'Biography', type: 'localeBlockContent', group: 'content'}),
     defineField({
       name: 'credentials',

@@ -20,6 +20,13 @@ export default defineType({
       type: 'array',
       of: [defineArrayMember({type: 'link'})],
     }),
+    defineField({
+      name: 'legal',
+      title: 'Legal links',
+      type: 'array',
+      description: 'Small links at the bottom of the footer, e.g. Disclaimer, Privacy Policy.',
+      of: [defineArrayMember({type: 'link'})],
+    }),
   ],
   preview: {prepare: () => ({title: 'Navigation'})},
 })

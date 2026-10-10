@@ -33,9 +33,8 @@ type Resolver = (payload: RevalidatePayload) => RevalidateTarget[];
 const wholeSite: Resolver = () => [{ path: '/[locale]', type: 'layout' }];
 
 /** Revalidates a corporate preset route's list page and every detail page below it, in
- * every language - e.g. /id/services, /en/services/<any slug>. Documents show up on each
- * other's pages (a service lists its key contacts, case studies and insights), so each type
- * names every route its cards appear on. */
+ * every language - e.g. /id/experience, /en/experience/<any slug>. For a type that shows
+ * nowhere else. */
 const collections =
   (...bases: CollectionRoute[]): Resolver =>
   () =>
@@ -48,18 +47,14 @@ export const revalidateMap: Record<string, Resolver> = {
   // reach every page, not just this one.
   page: wholeSite,
   // Corporate preset. Remove a type's entry together with its collection.
-  person: collections(routes.leadership, routes.services, routes.insights),
-  service: collections(
-    routes.services,
-    routes.industries,
-    routes.caseStudies,
-    routes.insights,
-    routes.leadership,
-  ),
-  industry: collections(routes.industries, routes.services, routes.caseStudies),
-  caseStudy: collections(routes.caseStudies, routes.services, routes.industries),
-  insight: collections(routes.insights, routes.services, routes.leadership),
-  jobOpening: collections(routes.careers),
+  // Partners, practice areas, sectors and articles all appear on the home page (and on
+  // About, Contact and each other's pages), so a change to any of them touches most routes.
+  person: wholeSite,
+  service: wholeSite,
+  industry: wholeSite,
+  insight: wholeSite,
+  // Matters only show on the Experience pages.
+  caseStudy: collections(routes.caseStudies),
   // Offices are in the footer; credentials are a page builder section on any page.
   office: wholeSite,
   credential: wholeSite,

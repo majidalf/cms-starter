@@ -20,18 +20,27 @@ const SANITY_CDN = 'https://cdn.sanity.io';
 // Cloudflare Web Analytics beacon script host and the endpoint it reports to.
 const CF_BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
 const CF_BEACON_API = 'https://cloudflareinsights.com';
+// Cloudflare Turnstile (contact form spam check): its script, and the frame it renders in.
+const CF_TURNSTILE = 'https://challenges.cloudflare.com';
+
+/** Images from scripts/mock-sanity.mjs, in `next dev` only. */
+function localSanityHost(isDev: boolean): string {
+  const host = process.env.NEXT_PUBLIC_SANITY_LOCAL_HOST;
+  return isDev && host ? ` ${host}` : '';
+}
 
 export function contentSecurityPolicy(isDev: boolean): string {
   const directives = [
     "default-src 'self'",
     // 'unsafe-eval' only for next dev (React Refresh); never in a production build.
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} ${CF_BEACON_SCRIPT}`,
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} ${CF_BEACON_SCRIPT} ${CF_TURNSTILE}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: ${SANITY_CDN}`,
+    `img-src 'self' data: blob: ${SANITY_CDN}${localSanityHost(isDev)}`,
     "font-src 'self'",
     `connect-src 'self' ${CF_BEACON_API}${isDev ? ' ws:' : ''}`,
-    // PDF attachments and other files are linked from the Sanity CDN, never embedded.
-    "frame-src 'none'",
+    // PDF attachments and other files are linked from the Sanity CDN, never embedded: the
+    // only frame is the Turnstile challenge.
+    `frame-src ${CF_TURNSTILE}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

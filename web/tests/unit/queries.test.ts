@@ -15,7 +15,6 @@ const service = await import('@/lib/sanity/collections/service');
 const industry = await import('@/lib/sanity/collections/industry');
 const caseStudy = await import('@/lib/sanity/collections/caseStudy');
 const insight = await import('@/lib/sanity/collections/insight');
-const jobOpening = await import('@/lib/sanity/collections/jobOpening');
 const office = await import('@/lib/sanity/collections/office');
 const core = await import('@/lib/sanity/queries');
 const sitemap = await import('@/lib/sanity/sitemapQuery');
@@ -39,13 +38,6 @@ const collections = [
     'service',
   ],
   [
-    industry.getIndustries,
-    industry.getIndustryBySlug,
-    industry.getIndustryByAnySlug,
-    industry.getIndustrySlugs,
-    'industry',
-  ],
-  [
     caseStudy.getCaseStudies,
     caseStudy.getCaseStudyBySlug,
     caseStudy.getCaseStudyByAnySlug,
@@ -58,13 +50,6 @@ const collections = [
     insight.getInsightByAnySlug,
     insight.getInsightSlugs,
     'insight',
-  ],
-  [
-    jobOpening.getJobOpenings,
-    jobOpening.getJobOpeningBySlug,
-    jobOpening.getJobOpeningByAnySlug,
-    jobOpening.getJobOpeningSlugs,
-    'jobOpening',
   ],
 ] as const;
 
@@ -99,23 +84,19 @@ describe('visibility rules', () => {
     expect(service.SERVICE_BY_SLUG_QUERY).toContain(
       '_type == "caseStudy" && clientConsent == true',
     );
-    expect(industry.INDUSTRY_BY_SLUG_QUERY).toContain(
-      '_type == "caseStudy" && clientConsent == true',
-    );
     expect(sitemap.SITEMAP_QUERY).toContain('_type == "caseStudy" && clientConsent == true');
     expect(sitemap.SITEMAP_QUERY).not.toMatch(/_type in \[[^\]]*"caseStudy"/);
   });
 
-  it('every job opening query requires an open position', () => {
-    for (const query of [
-      jobOpening.JOB_OPENINGS_QUERY,
-      jobOpening.JOB_OPENING_BY_SLUG_QUERY,
-      jobOpening.JOB_OPENING_BY_ANY_SLUG_QUERY,
-      jobOpening.JOB_OPENING_SLUGS_QUERY,
-      sitemap.SITEMAP_QUERY,
-    ]) {
-      expect(query).toContain('_type == "jobOpening" && isOpen == true');
-    }
+  it('sectors are listed by name only, so the sitemap has no sector pages', async () => {
+    await industry.getIndustries();
+    expect(fetchMock.mock.calls.at(-1)?.[0]).toContain('_type == "industry"');
+    expect(sitemap.SITEMAP_QUERY).not.toContain('"industry"');
+  });
+
+  it('the home page index asks only for featured scope items', async () => {
+    await service.getServicePanels();
+    expect(fetchMock.mock.calls.at(-1)?.[0]).toContain('scope[featured == true][0...3]');
   });
 
   it('credentials on pages require approval', () => {

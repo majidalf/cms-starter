@@ -12,3 +12,13 @@ export function localize<T>(value: Localized<T>, locale: Locale): T | undefined 
 export function localizeSlug(slug: Localized<string>, locale: Locale): string | undefined {
   return localize(slug, locale) || undefined;
 }
+
+/** Picks one language from each item of a localized list, dropping items it is missing in. */
+export function localizeList(
+  values: readonly Localized<string>[] | null | undefined,
+  locale: Locale,
+): string[] {
+  return (values ?? [])
+    .map((value) => localize(value, locale))
+    .filter((value): value is string => Boolean(value));
+}

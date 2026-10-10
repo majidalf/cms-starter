@@ -22,10 +22,8 @@ export const SITEMAP_ROUTES: Record<string, string> = {
   page: '',
   person: routes.leadership,
   service: routes.services,
-  industry: routes.industries,
   caseStudy: routes.caseStudies,
   insight: routes.insights,
-  jobOpening: routes.careers,
 };
 
 /**

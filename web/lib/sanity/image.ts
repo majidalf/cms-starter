@@ -1,5 +1,5 @@
 import { createImageUrlBuilder } from '@sanity/image-url';
-import { sanityClient } from './client';
+import { sanityClient, sanityLocalHost } from './client';
 
 /** Minimal shape shared by every Sanity image field (`image`, `imageWithAlt`, ...), loose
  * enough to accept the generated types in sanity.types.ts. */
@@ -10,7 +10,14 @@ export interface SanityImageRef {
   crop?: { top?: number; bottom?: number; left?: number; right?: number } | null;
 }
 
-const builder = createImageUrlBuilder(sanityClient);
+const localHost = sanityLocalHost();
+const builder = localHost
+  ? createImageUrlBuilder({
+      projectId: sanityClient.config().projectId ?? '',
+      dataset: sanityClient.config().dataset ?? '',
+      baseUrl: localHost,
+    })
+  : createImageUrlBuilder(sanityClient);
 
 /** For building a specific transform URL directly (e.g. a fixed-size thumbnail). */
 export function urlForImage(source: SanityImageRef) {

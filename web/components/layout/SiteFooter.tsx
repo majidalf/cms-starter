@@ -1,133 +1,165 @@
-import { getDictionary, type Locale } from '@/lib/i18n';
-import { telHref, type ResolvedLink } from '@/lib/links';
-import { localize } from '@/lib/sanity/localize';
-import { SanityImage } from '@/components/SanityImage';
-import { SiteLink } from '@/components/ui/SiteLink';
-import type { OFFICES_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '@/sanity.types';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+import type { ResolvedLink } from '@/lib/links';
+import { telHref } from '@/lib/links';
+
+export interface FooterOffice {
+  key: string;
+  /** "Jakarta · Main office" */
+  label: string;
+}
+
+export interface SiteFooterLabels {
+  footerNav: string;
+  legalNav: string;
+  site: string;
+  contact: string;
+  offices: string;
+}
 
 interface Props {
-  locale: Locale;
-  settings: NonNullable<SITE_SETTINGS_QUERY_RESULT>;
+  organizationName: string;
+  homeHref: string;
+  /** The logo image, rendered on the server. */
+  logo: ReactNode;
+  tagline?: string;
+  disclaimer?: string;
+  email?: string | null;
+  phone?: string | null;
+  social: { key: string; label: string; href: string }[];
   links: ResolvedLink[];
-  offices: OFFICES_QUERY_RESULT;
+  legalLinks: ResolvedLink[];
+  offices: FooterOffice[];
+  year: number;
+  labels: SiteFooterLabels;
+}
+
+const HEADING = 'text-[13px] leading-[15px] text-on-navy-2';
+const ITEM =
+  'w-fit text-[15px] leading-[18px] text-on-navy transition-colors hover:text-brass-light';
+const SMALL = 'text-[12px] leading-[18px] text-on-navy-2 lg:text-[13px] lg:leading-[15px]';
+
+function FooterLink({ link, className }: { link: ResolvedLink; className: string }) {
+  if (link.isExternal) {
+    return (
+      <a href={link.href} className={className} target="_blank" rel="noopener noreferrer">
+        {link.label}
+      </a>
+    );
+  }
+  return (
+    <Link href={link.href} className={className}>
+      {link.label}
+    </Link>
+  );
 }
 
 /**
- * Footer (design/Design.pen → Home · Desktop 1440 → Footer).
- * Navy-950, padding 100/40/32/40, gap 64. Top row (gap 40): brand column
- * (logo M 360×68 + tagline 15px) + three 260px columns (Site 15px links,
- * Contact, Offices). Bottom row: top rule, disclaimer 13px/1.5 (max 640)
- * + legal row 13px. Rendered once by the locale layout.
+ * Footer (Design.pen → Home · Desktop 1440 → Footer, Home · Mobile 375 → Footer).
+ * Desktop: brand column, then Site / Contact / Offices at 260px each, and a ruled bottom
+ * row with the disclaimer and the legal links. Mobile: logo, one link list, disclaimer,
+ * legal line. Side padding follows the page: 40px on the home page, 20px elsewhere.
  */
-export function SiteFooter({ locale, settings, links, offices }: Props) {
-  const t = getDictionary(locale);
-  const tagline = localize(settings.footerText, locale) || t.footerTagline;
-  const disclaimer = localize(settings.disclaimer, locale);
-  const linkedIn = settings.socialLinks?.find((link) =>
-    link.url?.toLowerCase().includes('linkedin'),
-  );
-  // Server-only render (no hydration mismatch possible). Kept out of module scope because
-  // module-level time isn't reliable on Cloudflare Workers.
-  // oxlint-disable-next-line react/purity
-  const year = new Date().getFullYear();
-
+export function SiteFooter({
+  organizationName,
+  homeHref,
+  logo,
+  tagline,
+  disclaimer,
+  email,
+  phone,
+  social,
+  links,
+  legalLinks,
+  offices,
+  year,
+  labels,
+}: Props) {
   return (
-    <footer className="bg-navy-950 text-on-navy-2">
-      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-4 pt-[100px] pb-8 md:gap-16 md:px-10">
-        <div className="flex flex-col gap-10 md:flex-row">
-          <div className="flex flex-1 flex-col gap-5">
-            {settings.logo?.asset ? (
-              <SanityImage
-                image={settings.logo}
-                locale={locale}
-                sizes="360px"
-                className="h-auto w-full max-w-[360px] object-contain"
-              />
-            ) : (
-              <p className="font-display text-2xl text-on-navy">{settings.organizationName}</p>
-            )}
-            <p className="max-w-md text-[15px] leading-relaxed">{tagline}</p>
-          </div>
-          {links.length > 0 && (
-            <nav
-              aria-label={t.footerNav}
-              className="flex w-full shrink-0 flex-col gap-[10px] md:w-[260px]"
+    <footer className="site-footer relative mx-auto flex w-full max-w-[1440px] flex-col gap-7 px-4 pb-7 pt-14 lg:gap-16 lg:px-5 lg:pb-8 lg:pt-[100px]">
+      <div className="flex flex-col gap-7 lg:flex-row lg:gap-10">
+        <div className="flex flex-col gap-5 lg:flex-1">
+          <Link
+            href={homeHref}
+            aria-label={organizationName}
+            className="flex h-11 w-[232px] items-center lg:h-[68px] lg:w-[360px]"
+          >
+            {logo}
+          </Link>
+          {tagline && (
+            <p className="hidden text-[15px] leading-[18px] text-on-navy-2 lg:block">{tagline}</p>
+          )}
+        </div>
+        <nav
+          aria-label={labels.footerNav}
+          className="flex flex-col gap-2 lg:w-[260px] lg:gap-[10px]"
+        >
+          <p className={`hidden lg:block ${HEADING}`}>{labels.site}</p>
+          <ul className="flex flex-col gap-2 lg:gap-[10px]">
+            {links.map((link) => (
+              <li key={link.key} className="flex">
+                <FooterLink link={link} className={ITEM} />
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="hidden w-[260px] flex-col gap-[10px] lg:flex">
+          <p className={HEADING}>{labels.contact}</p>
+          {email && (
+            <a href={`mailto:${email}`} className={ITEM}>
+              {email}
+            </a>
+          )}
+          {phone && (
+            <a href={telHref(phone)} className={ITEM}>
+              {phone}
+            </a>
+          )}
+          {social.map((item) => (
+            <a
+              key={item.key}
+              href={item.href}
+              className={ITEM}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <p className="text-[13px]">{t.footerSite}</p>
-              <ul className="flex flex-col gap-[10px]">
-                {links.map((link) => (
-                  <li key={link.key}>
-                    <SiteLink
-                      link={link}
-                      className="text-[15px] text-on-navy transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
-          <div className="flex w-full shrink-0 flex-col gap-[10px] md:w-[260px]">
-            <p className="text-[13px]">{t.footerContact}</p>
-            <ul className="flex flex-col gap-[10px] text-[15px] text-on-navy">
-              {settings.email && (
-                <li>
-                  <a
-                    href={`mailto:${settings.email}`}
-                    className="transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    {settings.email}
-                  </a>
-                </li>
-              )}
-              {settings.phone && (
-                <li>
-                  <a
-                    href={telHref(settings.phone)}
-                    className="transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    {settings.phone}
-                  </a>
-                </li>
-              )}
-              {linkedIn?.url && (
-                <li>
-                  <a
-                    href={linkedIn.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
-                  >
-                    LinkedIn
-                  </a>
-                </li>
-              )}
-            </ul>
-          </div>
-          {offices.length > 0 && (
-            <div className="flex w-full shrink-0 flex-col gap-[10px] md:w-[260px]">
-              <p className="text-[13px]">{t.footerOffices}</p>
-              <ul className="flex flex-col gap-[10px] text-[15px] text-on-navy">
-                {offices.map((office) => {
-                  const name = localize(office.name, locale);
-                  if (!name) return null;
-                  return <li key={office._id}>{name}</li>;
-                })}
-              </ul>
-            </div>
-          )}
+              {item.label}
+            </a>
+          ))}
         </div>
-        <div className="flex flex-col gap-6 border-t border-line-navy pt-6 md:flex-row md:items-start md:justify-between md:gap-10">
-          {disclaimer ? (
-            <p className="w-full max-w-[640px] text-[13px] leading-[1.5]">{disclaimer}</p>
-          ) : (
-            <p className="w-full max-w-[640px] text-[13px] leading-[1.5]">{t.article.disclaimer}</p>
-          )}
-          <p className="flex shrink-0 gap-6 text-[13px]">
-            <span>
-              © {year} {settings.legalName ?? settings.organizationName}
-            </span>
+        <div className="hidden w-[260px] flex-col gap-[10px] lg:flex">
+          <p className={HEADING}>{labels.offices}</p>
+          {offices.map((office) => (
+            <p key={office.key} className="text-[15px] leading-[18px] text-on-navy">
+              {office.label}
+            </p>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-7 lg:flex-row lg:justify-between lg:gap-10 lg:border-t lg:border-line-navy lg:pt-6">
+        {disclaimer && (
+          <p className="text-[12px] leading-[18px] text-on-navy-2 lg:max-w-[640px] lg:text-[13px] lg:leading-[20px]">
+            {disclaimer}
           </p>
-        </div>
+        )}
+        <nav aria-label={labels.legalNav}>
+          <ul className="flex flex-wrap items-center gap-x-[6px] gap-y-1 lg:gap-x-6">
+            {legalLinks.map((link) => (
+              <li key={link.key} className="flex items-center gap-x-[6px]">
+                <FooterLink
+                  link={link}
+                  className={`${SMALL} transition-colors hover:text-brass-light`}
+                />
+                <span aria-hidden="true" className={`${SMALL} lg:hidden`}>
+                  ·
+                </span>
+              </li>
+            ))}
+            <li className={SMALL}>
+              © {year} {organizationName}
+            </li>
+          </ul>
+        </nav>
       </div>
     </footer>
   );

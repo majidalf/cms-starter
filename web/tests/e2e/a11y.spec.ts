@@ -28,7 +28,7 @@ test.describe('404 page', () => {
   test.use({ allowNotFound: true });
 
   test('the 404 page has no serious accessibility violations', async ({ page }) => {
-    await page.goto('/id/tidak-ada');
+    await page.goto('/id/tidak-ada-halaman');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     expect(await blockingViolations(page)).toEqual([]);
   });

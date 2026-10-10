@@ -1,42 +1,39 @@
 import { test as base, expect } from '@playwright/test';
 
 /**
- * Seed URLs (studio/seed/sample.ndjson): the same content in Indonesian and English. A
- * project replacing the seed with real content updates this list.
+ * Seed URLs (studio/seed/harianja/harianja.ndjson): the same content in Indonesian and
+ * English. Replace this list when the seed content changes.
  */
 export const PAGE_PAIRS: { name: string; id: string; en: string }[] = [
   { name: 'home', id: '/id', en: '/en' },
-  { name: 'generic page', id: '/id/tentang-kami', en: '/en/about-us' },
-  { name: 'leadership', id: '/id/about/leadership', en: '/en/about/leadership' },
+  { name: 'about', id: '/id/about', en: '/en/about' },
+  { name: 'legal page', id: '/id/penafian', en: '/en/disclaimer' },
+  { name: 'partners', id: '/id/partners', en: '/en/partners' },
+  { name: 'profile', id: '/id/partners/zico-fernando', en: '/en/partners/zico-fernando' },
+  { name: 'practice areas', id: '/id/practice-areas', en: '/en/practice-areas' },
   {
-    name: 'profile',
-    id: '/id/about/leadership/ratna-wulandari',
-    en: '/en/about/leadership/ratna-wulandari',
+    name: 'practice area',
+    id: '/id/practice-areas/hukum-korporasi-komersial',
+    en: '/en/practice-areas/corporate-commercial-law',
   },
-  { name: 'services', id: '/id/services', en: '/en/services' },
-  { name: 'service', id: '/id/services/manajemen-risiko', en: '/en/services/risk-management' },
-  { name: 'industries', id: '/id/industries', en: '/en/industries' },
-  { name: 'industry', id: '/id/industries/jasa-keuangan', en: '/en/industries/financial-services' },
-  { name: 'case studies', id: '/id/case-studies', en: '/en/case-studies' },
+  { name: 'sectors', id: '/id/sectors', en: '/en/sectors' },
+  { name: 'experience', id: '/id/experience', en: '/en/experience' },
   {
-    name: 'case study',
-    id: '/id/case-studies/kerangka-risiko-bank-daerah',
-    en: '/en/case-studies/regional-bank-risk-framework',
+    name: 'matter',
+    id: '/id/experience/pemasok-piutang-dagang-belum-dibayar',
+    en: '/en/experience/supplier-unpaid-trade-receivable',
   },
   { name: 'insights', id: '/id/insights', en: '/en/insights' },
   {
     name: 'insight',
-    id: '/id/insights/pernyataan-selera-risiko',
-    en: '/en/insights/risk-appetite-statement',
-  },
-  { name: 'careers', id: '/id/careers', en: '/en/careers' },
-  {
-    name: 'job opening',
-    id: '/id/careers/konsultan-manajemen-risiko',
-    en: '/en/careers/risk-management-consultant',
+    id: '/id/insights/menyiapkan-tagihan-utang-sebelum-mengirim-somasi',
+    en: '/en/insights/preparing-a-debt-claim-before-sending-a-demand-letter',
   },
   { name: 'contact', id: '/id/contact', en: '/en/contact' },
 ];
+
+/** hreflang `x-default` points at the default language (English, decision D-14). */
+export const DEFAULT_LANG = 'en' as const;
 
 /** Every page: label, path, language and the id/en pair it belongs to. */
 export const PAGES = PAGE_PAIRS.flatMap((pair) => [

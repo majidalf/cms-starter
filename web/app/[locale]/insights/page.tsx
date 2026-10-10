@@ -1,127 +1,123 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getDictionary, isLocale, localePath } from '@/lib/i18n';
+import { detailPath } from '@/lib/collectionRoutes';
+import { formatShortDate, getDictionary, isLocale, localePath } from '@/lib/i18n';
 import { listPageMetadata } from '@/lib/pageMetadata';
 import { routes } from '@/lib/routes';
 import { getInsights } from '@/lib/sanity/collections/insight';
-import { EntryList } from '@/components/collections/EntryList';
-import { PageHeader } from '@/components/collections/PageHeader';
-import { insightEntries } from '@/components/collections/entries';
-import { Container } from '@/components/ui/Container';
+import { localize } from '@/lib/sanity/localize';
+import { getSiteSettings } from '@/lib/sanity/queries';
+import { InsightList, type InsightRow } from '@/components/insights/InsightList';
+import { PageHeader } from '@/components/sections/PageHeader';
+import { DesignNote } from '@/components/ui/DesignNote';
+import { UnderlineLink } from '@/components/ui/UnderlineLink';
 
-export function generateMetadata({ params }: PageProps<'/[locale]/insights'>) {
+export function generateMetadata({ params }: PageProps<'/[locale]/insights'>): Promise<Metadata> {
   return listPageMetadata(params, routes.insights, (t) => t.insights);
 }
 
-interface Props {
-  params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ category?: string | string[] }>;
-}
+/** The design's four chips, always offered. */
+const CATEGORY_ORDER = ['article', 'update', 'news', 'publication'];
+/** Still in the Studio list; offered only once an article uses it. */
+const OPTIONAL_CATEGORIES = ['pressRelease'];
+const INDENT = 'lg:pl-[calc((100%-40px)/3+20px)]';
 
 /**
- * Insights (design/Design.pen -> Insights · Desktop 1440): breadcrumb header,
- * category filter chips and the article list on navy-950. The filter is a
- * plain `?category=` link - server-rendered, no client JavaScript. With no
- * articles the page shows the designed empty state instead of a bare list.
+ * Insights (Design.pen → Insights · Desktop 1440 / Mobile 375, and Insights · Empty state):
+ * header, category filter and the article list; with no articles, the empty state with two
+ * links onward.
  */
-export default async function InsightsPage({ params, searchParams }: Props) {
+export default async function InsightsPage({ params }: PageProps<'/[locale]/insights'>) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  const t = getDictionary(locale);
-  const insights = await getInsights();
-  const base = localePath(locale, routes.insights);
 
-  const categories = (
-    Object.keys(t.insightCategories) as (keyof typeof t.insightCategories)[]
-  ).filter((category) => insights.some((insight) => insight.category === category));
-  const requestedParam = (await searchParams)?.category;
-  const requested = Array.isArray(requestedParam) ? requestedParam[0] : requestedParam;
-  const active = categories.includes(requested as (typeof categories)[number])
-    ? (requested as string)
-    : undefined;
-  const visible = active ? insights.filter((insight) => insight.category === active) : insights;
-  const entries = insightEntries(visible, locale);
+  const [insights, settings] = await Promise.all([getInsights(), getSiteSettings()]);
+  const t = getDictionary(locale);
+  const page = t.insightsPage;
+  const rows: InsightRow[] = insights.flatMap((insight) => {
+    const href = detailPath(locale, routes.insights, insight.slug);
+    const title = localize(insight.title, locale);
+    if (!href || !title) return [];
+    const category = insight.category ?? '';
+    return [
+      {
+        id: insight._id,
+        href,
+        title,
+        date: formatShortDate(insight.publishedAt, locale),
+        category,
+        categoryLabel: t.insightCategories[category] ?? category,
+        // Firm news has no byline; the firm is its author.
+        author: insight.author ?? settings?.organizationName ?? undefined,
+      },
+    ];
+  });
+  const isEmpty = rows.length === 0;
+  const used = new Set(rows.map((row) => row.category));
+  const categories = [
+    ...CATEGORY_ORDER,
+    ...OPTIONAL_CATEGORIES.filter((value) => used.has(value)),
+  ].map((value) => ({ value, label: t.insightCategories[value] ?? value }));
 
   return (
-    <div className="bg-navy-950 text-on-navy">
+    <>
       <PageHeader
-        locale={locale}
-        path={base}
-        title={t.insightsPage.heading}
-        eyebrow={t.insights}
-        intro={t.insightsPage.lead}
+        breadcrumbLabel={t.breadcrumb}
+        breadcrumb={[{ label: t.homeLabel, href: localePath(locale) }, { label: t.insights }]}
+        label={page.label}
+        title={page.heading}
+        lead={isEmpty ? undefined : page.lead}
+        spacing={isEmpty ? 'pb-10 lg:pb-16' : 'pb-8 lg:pb-16'}
       />
-
-      {categories.length > 0 && (
-        <nav aria-label={t.insightsPage.filter} className="pb-10">
-          <Container className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-on-navy-2">{t.insightsPage.filter}</span>
-            <ul className="flex flex-wrap gap-2.5">
-              <li>
-                <Link
-                  href={base}
-                  aria-current={active === undefined ? 'page' : undefined}
-                  className={`inline-flex rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
-                    active === undefined
-                      ? 'bg-paper text-navy-900'
-                      : 'border border-on-navy/30 text-on-navy-2 hover:border-brass-light hover:text-brass-light'
-                  }`}
-                >
-                  {t.insightsPage.all}
-                </Link>
-              </li>
-              {categories.map((category) => (
-                <li key={category}>
-                  <Link
-                    href={`${base}?category=${category}`}
-                    aria-current={active === category ? 'page' : undefined}
-                    className={`inline-flex rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring ${
-                      active === category
-                        ? 'bg-paper text-navy-900'
-                        : 'border border-on-navy/30 text-on-navy-2 hover:border-brass-light hover:text-brass-light'
-                    }`}
-                  >
-                    {t.insightCategories[category]}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Container>
-        </nav>
-      )}
-
-      <Container className="pb-20">
-        {entries.length === 0 ? (
-          <div className="flex max-w-2xl flex-col gap-5 border-t border-on-navy/15 pt-10">
-            <h2 className="font-display text-4xl leading-tight text-on-navy">
-              {t.insightsPage.emptyTitle}
+      {isEmpty ? (
+        <section
+          className={`relative mx-auto w-full max-w-[1440px] pb-24 lg:pb-28 lg:pr-5 ${INDENT}`}
+        >
+          <div className="flex flex-col gap-4 border-t border-line-navy px-4 pt-7 lg:gap-5 lg:px-0 lg:pt-10">
+            <h2 className="font-display text-[32px] leading-[35px] tracking-[-0.4px] text-on-navy lg:text-[36px] lg:leading-[38px] lg:tracking-normal">
+              {page.emptyTitle}
             </h2>
-            <p className="text-lg leading-relaxed text-on-navy-2">{t.insightsPage.emptyText}</p>
-            <ul className="flex flex-wrap gap-x-7 gap-y-2 pt-2">
-              <li>
-                <Link
-                  href={localePath(locale, routes.services)}
-                  className="inline-flex items-center gap-2 border-b border-on-navy/40 pb-1 font-medium text-on-navy transition-colors hover:border-brass-light hover:text-brass-light"
-                >
-                  {t.services}
-                  <span aria-hidden="true">→</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={localePath(locale, routes.contact)}
-                  className="inline-flex items-center gap-2 border-b border-on-navy/40 pb-1 font-medium text-on-navy transition-colors hover:border-brass-light hover:text-brass-light"
-                >
-                  {t.contact}
-                  <span aria-hidden="true">→</span>
-                </Link>
-              </li>
-            </ul>
+            <p className="text-[16px] leading-[24px] text-on-navy-2 lg:max-w-[600px] lg:text-[18px] lg:leading-[27px]">
+              {page.emptyText}
+            </p>
+            <div className="flex flex-col lg:flex-row lg:gap-7 lg:pt-2">
+              <UnderlineLink
+                href={localePath(locale, routes.services)}
+                size="touch"
+                icon="arrowUpRight"
+              >
+                {page.seePracticeAreas}
+              </UnderlineLink>
+              <UnderlineLink
+                href={localePath(locale, routes.leadership)}
+                size="touch"
+                icon="arrowUpRight"
+              >
+                {page.contactPartner}
+              </UnderlineLink>
+            </div>
           </div>
-        ) : (
-          <EntryList entries={entries} />
-        )}
-      </Container>
-    </div>
+        </section>
+      ) : (
+        <>
+          <InsightList
+            rows={rows}
+            categories={categories}
+            labels={{
+              filter: page.filter,
+              all: page.all,
+              loadMore: page.loadMore,
+              emptyFiltered: page.emptyFiltered,
+            }}
+          />
+          <div className={`relative mx-auto w-full max-w-[1440px] px-4 lg:pr-5 ${INDENT}`}>
+            <DesignNote className="max-w-[700px] text-[14px] leading-[21px] lg:text-[13px] lg:leading-[15px]">
+              {page.draftNote}
+            </DesignNote>
+          </div>
+          <div aria-hidden="true" className="h-14 lg:h-28" />
+        </>
+      )}
+    </>
   );
 }
