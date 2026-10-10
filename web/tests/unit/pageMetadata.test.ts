@@ -17,7 +17,7 @@ describe('listPageMetadata', () => {
       (t) => t.services,
     );
     expect(meta).toMatchObject({
-      title: 'Services',
+      title: 'Practice Areas',
       description: 'Default',
       alternates: {
         canonical: '/en/services',

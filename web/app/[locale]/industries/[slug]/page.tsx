@@ -52,21 +52,23 @@ export default async function IndustryPage({ params }: PageProps<'/[locale]/indu
   const caseStudies = caseStudyEntries(industry.caseStudies, locale);
 
   return (
-    <article className="pb-16">
-      <PageHeader
-        locale={locale}
-        path={localePath(locale, `${BASE}/${slug}`)}
-        title={localize(industry.title, locale) ?? ''}
-        intro={localize(industry.summary, locale)}
-        back={{ href: localePath(locale, BASE), label: t.industries }}
-      />
-      <RichText value={localize(industry.body, locale)} />
-      <RelatedBlock title={t.relatedServices} isEmpty={services.length === 0}>
-        <EntryList entries={services} headingLevel="h3" />
-      </RelatedBlock>
-      <RelatedBlock title={t.relatedCaseStudies} isEmpty={caseStudies.length === 0}>
-        <EntryList entries={caseStudies} headingLevel="h3" />
-      </RelatedBlock>
-    </article>
+    <div className="bg-navy-950 text-on-navy">
+      <article className="pb-16">
+        <PageHeader
+          locale={locale}
+          path={localePath(locale, `${BASE}/${slug}`)}
+          title={localize(industry.title, locale) ?? ''}
+          intro={localize(industry.summary, locale)}
+          back={{ href: localePath(locale, BASE), label: t.industries }}
+        />
+        <RichText value={localize(industry.body, locale)} />
+        <RelatedBlock title={t.relatedServices} isEmpty={services.length === 0}>
+          <EntryList entries={services} headingLevel="h3" />
+        </RelatedBlock>
+        <RelatedBlock title={t.relatedCaseStudies} isEmpty={caseStudies.length === 0}>
+          <EntryList entries={caseStudies} headingLevel="h3" />
+        </RelatedBlock>
+      </article>
+    </div>
   );
 }

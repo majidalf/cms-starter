@@ -16,22 +16,33 @@ interface Props {
   emptyText?: string;
 }
 
-/** Plain list of linked entries for list pages and "related" blocks. */
+/**
+ * Plain list of linked entries for list pages and "related" blocks.
+ * Editorial list rows (design/Design.pen): thin on-navy rule, small meta line,
+ * serif title, brass-light on hover.
+ */
 export function EntryList({ entries, headingLevel = 'h2', emptyText }: Props) {
-  if (entries.length === 0) return emptyText ? <p className="text-muted">{emptyText}</p> : null;
+  if (entries.length === 0) return emptyText ? <p className="text-on-navy-2">{emptyText}</p> : null;
   const Heading = headingLevel;
 
   return (
     <ul className="grid gap-x-10 gap-y-8 md:grid-cols-2">
       {entries.map((entry) => (
-        <li key={entry.key} className="flex flex-col gap-2 border-t border-ink/15 pt-5">
-          {entry.meta && <p className="text-xs uppercase tracking-wide text-muted">{entry.meta}</p>}
-          <Heading className="font-serif text-xl text-brand">
-            <Link href={entry.href} className="hover:underline hover:underline-offset-4">
+        <li key={entry.key} className="flex flex-col gap-2 border-t border-on-navy/15 pt-5">
+          {entry.meta && (
+            <p className="text-xs uppercase tracking-wide text-on-navy-2">{entry.meta}</p>
+          )}
+          <Heading className="font-serif text-xl text-on-navy">
+            <Link
+              href={entry.href}
+              className="transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus-ring"
+            >
               {entry.title}
             </Link>
           </Heading>
-          {entry.summary && <p className="text-sm text-muted">{entry.summary}</p>}
+          {entry.summary && (
+            <p className="text-sm leading-relaxed text-on-navy-2">{entry.summary}</p>
+          )}
         </li>
       ))}
     </ul>

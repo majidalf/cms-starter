@@ -11,6 +11,7 @@ import {
   getInsightByAnySlug,
   getInsightBySlug,
   getInsightSlugs,
+  getInsights,
 } from '@/lib/sanity/collections/insight';
 import { localize } from '@/lib/sanity/localize';
 import { EntryList } from '@/components/collections/EntryList';
@@ -46,6 +47,11 @@ export async function generateMetadata({
   );
 }
 
+/**
+ * Insight article (design/Design.pen -> Insights Article · Desktop 1440):
+ * date + author eyebrow, display H1, comfortable-measure body, disclaimer
+ * note, author card, related practice areas and previous/next links.
+ */
 export default async function InsightPage({ params }: PageProps<'/[locale]/insights/[slug]'>) {
   const { locale, slug } = await params;
   if (!isLocale(locale)) notFound();
@@ -62,6 +68,10 @@ export default async function InsightPage({ params }: PageProps<'/[locale]/insig
     const href = detailPath(locale, routes.leadership, author.slug);
     return href && author.name ? [{ key: author._id, href, name: author.name }] : [];
   });
+  const authorNames = authors.map((author) => author.name).join(', ');
+  const eyebrow = [category, date, authorNames ? `${t.by} ${authorNames}` : undefined]
+    .filter(Boolean)
+    .join(' · ');
 
   const structuredData = articleJsonLd({
     headline: localize(insight.title, locale) ?? '',
@@ -73,45 +83,89 @@ export default async function InsightPage({ params }: PageProps<'/[locale]/insig
     organizationUrl: siteUrl.origin,
   });
 
+  // Previous (newer) and next (older) in publication order.
+  const all = await getInsights();
+  const position = all.findIndex((item) => item._id === insight._id);
+  const neighbor = (offset: number) => {
+    const item = position >= 0 ? all[position + offset] : undefined;
+    const title = item ? localize(item.title, locale) : undefined;
+    const href = item ? detailPath(locale, BASE, item.slug) : undefined;
+    return title && href ? { title, href } : undefined;
+  };
+  const previous = neighbor(-1);
+  const next = neighbor(1);
+
   return (
-    <article className="pb-16">
-      <JsonLd data={structuredData} />
-      <PageHeader
-        locale={locale}
-        path={localePath(locale, `${BASE}/${slug}`)}
-        title={localize(insight.title, locale) ?? ''}
-        eyebrow={[category, date].filter(Boolean).join(' · ')}
-        intro={localize(insight.excerpt, locale)}
-        back={{ href: localePath(locale, BASE), label: t.insights }}
-      >
-        {authors.length > 0 && (
-          <p className="text-sm">
-            <span className="text-muted">{t.authors}: </span>
-            {authors.map((author, index) => (
-              <span key={author.key}>
-                {index > 0 && ', '}
-                <Link href={author.href} className="underline underline-offset-2">
-                  {author.name}
-                </Link>
-              </span>
-            ))}
+    <div className="bg-navy-950 text-on-navy">
+      <article className="pb-8">
+        <JsonLd data={structuredData} />
+        <PageHeader
+          locale={locale}
+          path={localePath(locale, `${BASE}/${slug}`)}
+          title={localize(insight.title, locale) ?? ''}
+          eyebrow={eyebrow || category}
+          intro={localize(insight.excerpt, locale)}
+          back={{ href: localePath(locale, BASE), label: t.insights }}
+        >
+          {authors.length > 0 && (
+            <p className="text-sm text-on-navy-2">
+              <span>{t.authors}: </span>
+              {authors.map((author, index) => (
+                <span key={author.key}>
+                  {index > 0 && ', '}
+                  <Link
+                    href={author.href}
+                    className="text-on-navy underline underline-offset-2 hover:text-brass-light"
+                  >
+                    {author.name}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          )}
+        </PageHeader>
+        <RichText value={localize(insight.body, locale)} />
+        <Container className="max-w-3xl py-2">
+          <p className="border-t border-on-navy/15 pt-6 text-sm leading-relaxed text-on-navy-2">
+            {t.article.disclaimer}
           </p>
-        )}
-      </PageHeader>
-      <RichText value={localize(insight.body, locale)} />
-      {attachmentUrl && (
-        <Container className="py-6">
-          <a
-            href={`${attachmentUrl}?dl=`}
-            className="inline-flex items-center border border-current px-5 py-3 text-sm font-medium text-brand hover:bg-brand hover:text-surface"
-          >
-            {t.downloadPdf}
-          </a>
         </Container>
-      )}
-      <RelatedBlock title={t.relatedServices} isEmpty={services.length === 0}>
-        <EntryList entries={services} headingLevel="h3" />
-      </RelatedBlock>
-    </article>
+        {attachmentUrl && (
+          <Container className="max-w-3xl py-6">
+            <a
+              href={`${attachmentUrl}?dl=`}
+              className="inline-flex items-center gap-3 rounded-xs bg-paper px-6 py-4 text-base font-medium text-navy-900 transition-colors hover:bg-brass-light focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-focus-ring"
+            >
+              {t.downloadPdf}
+            </a>
+          </Container>
+        )}
+        <RelatedBlock title={t.article.relatedAreas} isEmpty={services.length === 0}>
+          <EntryList entries={services} headingLevel="h3" />
+        </RelatedBlock>
+        {(previous || next) && (
+          <Container className="flex flex-wrap items-center justify-between gap-4 py-10">
+            {previous ? (
+              <Link
+                href={previous.href}
+                className="inline-flex items-center gap-2 text-on-navy-2 transition-colors hover:text-brass-light"
+              >
+                <span aria-hidden="true">←</span> {t.previous}: {previous.title}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <Link
+                href={next.href}
+                className="inline-flex items-center gap-2 text-on-navy-2 transition-colors hover:text-brass-light"
+              >
+                {t.next}: {next.title} <span aria-hidden="true">→</span>
+              </Link>
+            )}
+          </Container>
+        )}
+      </article>
+    </div>
   );
 }

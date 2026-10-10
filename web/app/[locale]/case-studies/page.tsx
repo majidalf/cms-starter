@@ -19,7 +19,7 @@ export default async function CaseStudiesPage({ params }: PageProps<'/[locale]/c
   const caseStudies = await getCaseStudies();
 
   return (
-    <>
+    <div className="bg-navy-950 text-on-navy">
       <PageHeader
         locale={locale}
         path={localePath(locale, routes.caseStudies)}
@@ -28,6 +28,6 @@ export default async function CaseStudiesPage({ params }: PageProps<'/[locale]/c
       <Container className="pb-20">
         <EntryList entries={caseStudyEntries(caseStudies, locale)} emptyText={t.emptyList} />
       </Container>
-    </>
+    </div>
   );
 }

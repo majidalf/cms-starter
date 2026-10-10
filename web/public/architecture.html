@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CMS-Starter & Multi-Agent Architecture</title>
+  <style>
+    body { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 40px; }
+    h1 { color: #38bdf8; font-size: 24px; margin-bottom: 8px; }
+    p.sub { color: #94a3b8; font-size: 14px; margin-bottom: 32px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .card { background: rgba(15, 23, 42, 0.7); border: 1px solid #1e293b; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .card h3 { margin-top: 0; color: #34d399; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; display: inline-block; }
+    .dot.blue { background: #38bdf8; }
+    .dot.purple { background: #a78bfa; }
+    ul { padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.6; }
+    .flow { margin-top: 40px; padding: 24px; background: rgba(30, 41, 59, 0.4); border-radius: 12px; border: 1px dashed #334155; }
+    .flow h2 { color: #fbbf24; font-size: 16px; margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Harianja & Putra CMS-Starter Architecture</h1>
+  <p class="sub">Visualisasi alur kerja multi-agent di VPS Ubuntu (Hermes + OpenCode + Pencil.dev MCP)</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="dot blue"></span> 1. Hermes Agent (Orchestrator)</h3>
+      <ul>
+        <li>Interface utama berbasis Telegram (chat interaktif).</li>
+        <li>Menggunakan model Gemini 3.5 Flash Lite.</li>
+        <li>Menangkap instruksi user, memanggil tool, dan mengelola orkestrasi task.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot"></span> 2. OpenCode / Muse-Spark (Executor)</h3>
+      <ul>
+        <li>Server background di port 4096 (`opencode serve`).</li>
+        <li>Model gratis kontributor (`muse-spark-1.3-contributor-free`).</li>
+        <li>Fokus menulis kode Next.js 16, Tailwind 4, dan komponen UI.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot purple"></span> 3. Pencil.dev MCP (Design Sync)</h3>
+      <ul>
+        <li>Terhubung lewat CLI (`pen`) dan file `Design.pen`.</li>
+        <li>Membaca token warna, tipografi, dan hierarki *frame* secara presisi.</li>
+        <li>Menjamin hasil koding identik dengan rancangan desainer.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="flow">
+    <h2>Alur Kerja (Workflow)</h2>
+    <ul>
+      <li><strong>1. Request:</strong> User mengirim instruksi redesign atau fitur lewat Telegram.</li>
+      <li><strong>2. Planning & Sync:</strong> Hermes memparsing konteks, memeriksa file `Design.pen` via MCP/parser.</li>
+      <li><strong>3. Execution:</strong> OpenCode mengimplementasikan kode React/Next.js sesuai token desain.</li>
+      <li><strong>4. Verification & Tunnel:</strong> Build diverifikasi (`next build`), lalu diekspos secara publik lewat Cloudflare Tunnel untuk dicek langsung oleh user.</li>
+    </ul>
+  </div>
+</body>
+</html>

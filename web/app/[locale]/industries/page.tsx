@@ -19,7 +19,7 @@ export default async function IndustriesPage({ params }: PageProps<'/[locale]/in
   const industries = await getIndustries();
 
   return (
-    <>
+    <div className="bg-navy-950 text-on-navy">
       <PageHeader
         locale={locale}
         path={localePath(locale, routes.industries)}
@@ -28,6 +28,6 @@ export default async function IndustriesPage({ params }: PageProps<'/[locale]/in
       <Container className="pb-20">
         <EntryList entries={industryEntries(industries, locale)} emptyText={t.emptyList} />
       </Container>
-    </>
+    </div>
   );
 }

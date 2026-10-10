@@ -7,6 +7,7 @@ import { getNavigation, getSiteSettings } from '@/lib/sanity/queries';
 import { siteUrl } from '@/lib/site';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { CloudflareAnalytics } from '@/components/analytics/CloudflareAnalytics';
 import { JsonLd } from '@/components/JsonLd';
 import '../globals.css';
 
@@ -82,6 +83,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
           links={resolveLinks(navigation?.footer, locale)}
           offices={offices}
         />
+        <CloudflareAnalytics />
       </body>
     </html>
   );

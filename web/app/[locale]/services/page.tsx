@@ -19,11 +19,11 @@ export default async function ServicesPage({ params }: PageProps<'/[locale]/serv
   const services = await getServices();
 
   return (
-    <>
+    <div className="bg-navy-950 text-on-navy">
       <PageHeader locale={locale} path={localePath(locale, routes.services)} title={t.services} />
       <Container className="pb-20">
         <EntryList entries={serviceEntries(services, locale)} emptyText={t.emptyList} />
       </Container>
-    </>
+    </div>
   );
 }

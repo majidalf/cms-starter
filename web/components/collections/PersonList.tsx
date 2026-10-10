@@ -29,11 +29,17 @@ interface Props {
   locale: Locale;
   /** h2 on a page of its own, h3 under a group heading or "related" block. */
   headingLevel?: 'h2' | 'h3';
+  /** "dark" on navy backgrounds, "light" on paper panels (e.g. the About page). */
+  tone?: 'dark' | 'light';
 }
 
-/** People with photo, name and position, each linking to their profile. */
-export function PersonList({ people, locale, headingLevel = 'h3' }: Props) {
+/**
+ * People with photo, name and position, each linking to their profile.
+ * Editorial cards (design/Design.pen): rounded photo, serif name, muted role.
+ */
+export function PersonList({ people, locale, headingLevel = 'h3', tone = 'dark' }: Props) {
   const Heading = headingLevel;
+  const light = tone === 'light';
   return (
     <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
       {visiblePeople(people, locale).map((person) => {
@@ -45,14 +51,19 @@ export function PersonList({ people, locale, headingLevel = 'h3' }: Props) {
               image={person.photo}
               locale={locale}
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-              className="aspect-[4/5] w-full object-cover"
+              className="aspect-[4/5] w-full rounded-photo object-cover"
             />
-            <Heading className="font-serif text-xl text-brand">
-              <Link href={href} className="hover:underline hover:underline-offset-4">
+            <Heading className={`font-serif text-xl ${light ? 'text-navy-900' : 'text-on-navy'}`}>
+              <Link
+                href={href}
+                className="transition-colors hover:text-brass-light focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus-ring"
+              >
                 {person.name}
               </Link>
             </Heading>
-            <p className="text-sm text-muted">{localize(person.position, locale)}</p>
+            <p className={`text-sm ${light ? 'text-ink-2' : 'text-on-navy-2'}`}>
+              {localize(person.position, locale)}
+            </p>
           </li>
         );
       })}

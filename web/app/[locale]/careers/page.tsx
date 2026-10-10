@@ -19,11 +19,11 @@ export default async function CareersPage({ params }: PageProps<'/[locale]/caree
   const openings = await getJobOpenings();
 
   return (
-    <>
+    <div className="bg-navy-950 text-on-navy">
       <PageHeader locale={locale} path={localePath(locale, routes.careers)} title={t.careers} />
       <Container className="pb-20">
         <EntryList entries={jobOpeningEntries(openings, locale)} emptyText={t.noOpenings} />
       </Container>
-    </>
+    </div>
   );
 }

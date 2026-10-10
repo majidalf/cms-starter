@@ -9,6 +9,7 @@ const API_VERSION = '2025-01-01'
  * folders in web/app/[locale]/). A `page` with one of these slugs would never be reachable,
  * because the route folder wins over app/[locale]/[slug]. Keep in sync with routes.ts. */
 const RESERVED_PAGE_SLUGS = new Set([
+  'about',
   'services',
   'industries',
   'case-studies',

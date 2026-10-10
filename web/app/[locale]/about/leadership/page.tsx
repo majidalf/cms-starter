@@ -26,23 +26,26 @@ export default async function LeadershipPage({ params }: PageProps<'/[locale]/ab
   })).filter(({ people: members }) => members.length > 0);
 
   return (
-    <>
+    <div className="bg-navy-950 text-on-navy">
       <PageHeader
         locale={locale}
         path={localePath(locale, routes.leadership)}
         title={t.leadership}
       />
       <Container className="flex flex-col gap-16 pb-20">
-        {groups.length === 0 && <p className="text-muted">{t.emptyList}</p>}
+        {groups.length === 0 && <p className="text-on-navy-2">{t.emptyList}</p>}
         {groups.map(({ group, people: members }) => (
           <section key={group} aria-labelledby={`group-${group}`} className="flex flex-col gap-8">
-            <h2 id={`group-${group}`} className="font-serif text-2xl text-brand">
+            <h2
+              id={`group-${group}`}
+              className="text-sm font-medium uppercase tracking-[0.18em] text-on-navy-2"
+            >
               {t.personGroups[group]}
             </h2>
             <PersonList people={members} locale={locale} />
           </section>
         ))}
       </Container>
-    </>
+    </div>
   );
 }

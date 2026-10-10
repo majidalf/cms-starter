@@ -3,3 +3,10 @@
 # separate from the NEXT_PUBLIC_* vars in .env.local - Wrangler reads this file specifically.
 NEXTJS_ENV=development
 SANITY_REVALIDATE_SECRET=
+TURNSTILE_SECRET_KEY=
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+CONTACT_FROM_EMAIL=
+# Public Cloudflare Web Analytics site token (see .env.example). When empty,
+# the beacon script is not rendered.
+NEXT_PUBLIC_CLOUDFLARE_ANALYTICS_TOKEN=

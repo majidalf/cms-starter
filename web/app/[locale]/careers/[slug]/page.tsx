@@ -55,37 +55,39 @@ export default async function JobOpeningPage({ params }: PageProps<'/[locale]/ca
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact.value));
 
   return (
-    <article className="pb-16">
-      <PageHeader
-        locale={locale}
-        path={localePath(locale, `${BASE}/${slug}`)}
-        title={localize(opening.title, locale) ?? ''}
-        back={{ href: localePath(locale, BASE), label: t.careers }}
-      >
-        <dl className="flex flex-wrap gap-x-10 gap-y-2 text-sm">
-          {facts.map((fact) => (
-            <div key={fact.label}>
-              <dt className="text-muted">{fact.label}</dt>
-              <dd>{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </PageHeader>
-      <RichText value={localize(opening.description, locale)} />
-      {applyHref && (
-        <Container className="flex flex-col gap-3 py-6">
-          <h2 className="font-serif text-2xl text-brand">{t.apply}</h2>
-          <p>
-            <a
-              href={applyHref}
-              className="inline-flex items-center bg-brand px-5 py-3 text-sm font-medium text-surface hover:bg-ink"
-              {...(!isMailto ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-            >
-              {isMailto ? applyHref.slice('mailto:'.length) : t.apply}
-            </a>
-          </p>
-        </Container>
-      )}
-    </article>
+    <div className="bg-navy-950 text-on-navy">
+      <article className="pb-16">
+        <PageHeader
+          locale={locale}
+          path={localePath(locale, `${BASE}/${slug}`)}
+          title={localize(opening.title, locale) ?? ''}
+          back={{ href: localePath(locale, BASE), label: t.careers }}
+        >
+          <dl className="flex flex-wrap gap-x-10 gap-y-2 text-sm">
+            {facts.map((fact) => (
+              <div key={fact.label}>
+                <dt className="text-on-navy-2">{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </PageHeader>
+        <RichText value={localize(opening.description, locale)} />
+        {applyHref && (
+          <Container className="flex flex-col gap-3 py-6">
+            <h2 className="font-serif text-2xl text-on-navy">{t.apply}</h2>
+            <p>
+              <a
+                href={applyHref}
+                className="inline-flex items-center gap-3 rounded-xs bg-paper px-6 py-4 text-base font-medium text-navy-900 transition-colors hover:bg-brass-light focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-focus-ring"
+                {...(!isMailto ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              >
+                {isMailto ? applyHref.slice('mailto:'.length) : t.apply}
+              </a>
+            </p>
+          </Container>
+        )}
+      </article>
+    </div>
   );
 }

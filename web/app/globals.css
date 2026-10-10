@@ -1,23 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Public+Sans:ital,wght@0,300..700;1,300..700&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
 /*
- * Design tokens. Tailwind 4 has no tailwind.config.ts - every token lives here, so a
- * new client's brand only means editing this block. Values below are neutral
- * placeholders, not a design.
+ * Harianja & Putra Law Firm — design tokens.
+ * Source: design/Design.pen (00 Foundations).
+ * Tailwind 4 has no tailwind.config.ts - every token lives here.
+ * Legacy aliases (surface / ink / muted / brand / accent) are kept so
+ * existing sections keep working; they map onto the law-firm palette.
  */
 @theme {
-  --color-surface: oklch(98.5% 0.004 90);
-  --color-ink: oklch(22% 0.01 260);
-  --color-muted: oklch(50% 0.01 260);
-  --color-brand: oklch(35% 0.08 255);
-  --color-accent: oklch(62% 0.12 70);
+  /* Law-firm palette */
+  --color-navy-950: #081426;
+  --color-navy-900: #0b1b34;
+  --color-navy-800: #16294a;
+  --color-navy-700: #213a63;
+  --color-navy-600: #2e4a78;
 
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
-  --font-serif: ui-serif, Georgia, serif;
+  --color-paper: #ece8df;
+  --color-paper-hi: #f7f6f2;
+
+  --color-on-navy: #e9ecf2;
+  --color-on-navy-2: #a7b1c4;
+
+  --color-brass: #d99a2b;
+  --color-brass-light: #e8b65a;
+  --color-bronze: #8a5a14;
+
+  --color-ink-2: #4a5468;
+  --color-line-navy: #2e4a78;
+  --color-gridline: #e9ecf212;
+  --color-field-border: #5f7299;
+  --color-focus-ring: #e8b65a;
+
+  /* Legacy aliases -> law-firm palette */
+  --color-surface: var(--color-paper-hi);
+  --color-ink: var(--color-navy-900);
+  --color-muted: var(--color-ink-2);
+  --color-brand: var(--color-navy-900);
+  --color-accent: var(--color-brass);
+
+  /* Type */
+  --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Libre Caslon Text', ui-serif, Georgia, serif;
+  --font-display: 'Libre Caslon Display', 'Libre Caslon Text', ui-serif, Georgia, serif;
+
+  /* Shape */
+  --radius-card: 16px;
+  --radius-panel: 20px;
+  --radius-photo: 12px;
 }
 
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
+}
+
+::selection {
+  background-color: var(--color-brass);
+  color: var(--color-navy-950);
+}
+
+/* Keyboard focus: visible, consistent, on-brand (ux priority 1). */
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+/* Respect reduced motion: no smooth scroll, no transitions (ux priority 7). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

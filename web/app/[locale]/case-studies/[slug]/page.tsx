@@ -54,34 +54,36 @@ export default async function CaseStudyPage({
   const industries = industryEntries(caseStudy.industries ?? [], locale);
 
   return (
-    <article className="pb-16">
-      <PageHeader
-        locale={locale}
-        path={localePath(locale, `${BASE}/${slug}`)}
-        title={localize(caseStudy.title, locale) ?? ''}
-        intro={localize(caseStudy.summary, locale)}
-        back={{ href: localePath(locale, BASE), label: t.caseStudies }}
-      >
-        <dl className="flex flex-wrap gap-x-10 gap-y-2 text-sm">
-          <div>
-            <dt className="text-muted">{t.client}</dt>
-            <dd>{localize(caseStudy.client, locale)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted">{t.year}</dt>
-            <dd>{caseStudy.year}</dd>
-          </div>
-        </dl>
-      </PageHeader>
-      <RichText heading={t.challenge} value={localize(caseStudy.challenge, locale)} />
-      <RichText heading={t.approach} value={localize(caseStudy.approach, locale)} />
-      <RichText heading={t.outcome} value={localize(caseStudy.outcome, locale)} />
-      <RelatedBlock title={t.relatedServices} isEmpty={services.length === 0}>
-        <EntryList entries={services} headingLevel="h3" />
-      </RelatedBlock>
-      <RelatedBlock title={t.relatedIndustries} isEmpty={industries.length === 0}>
-        <EntryList entries={industries} headingLevel="h3" />
-      </RelatedBlock>
-    </article>
+    <div className="bg-navy-950 text-on-navy">
+      <article className="pb-16">
+        <PageHeader
+          locale={locale}
+          path={localePath(locale, `${BASE}/${slug}`)}
+          title={localize(caseStudy.title, locale) ?? ''}
+          intro={localize(caseStudy.summary, locale)}
+          back={{ href: localePath(locale, BASE), label: t.caseStudies }}
+        >
+          <dl className="flex flex-wrap gap-x-10 gap-y-2 text-sm">
+            <div>
+              <dt className="text-on-navy-2">{t.client}</dt>
+              <dd>{localize(caseStudy.client, locale)}</dd>
+            </div>
+            <div>
+              <dt className="text-on-navy-2">{t.year}</dt>
+              <dd>{caseStudy.year}</dd>
+            </div>
+          </dl>
+        </PageHeader>
+        <RichText heading={t.challenge} value={localize(caseStudy.challenge, locale)} />
+        <RichText heading={t.approach} value={localize(caseStudy.approach, locale)} />
+        <RichText heading={t.outcome} value={localize(caseStudy.outcome, locale)} />
+        <RelatedBlock title={t.relatedServices} isEmpty={services.length === 0}>
+          <EntryList entries={services} headingLevel="h3" />
+        </RelatedBlock>
+        <RelatedBlock title={t.relatedIndustries} isEmpty={industries.length === 0}>
+          <EntryList entries={industries} headingLevel="h3" />
+        </RelatedBlock>
+      </article>
+    </div>
   );
 }

@@ -17,16 +17,19 @@ export interface HeaderEntry {
 
 /** Origins the site loads from besides itself. Add analytics/embeds per project here. */
 const SANITY_CDN = 'https://cdn.sanity.io';
+// Cloudflare Web Analytics beacon script host and the endpoint it reports to.
+const CF_BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
+const CF_BEACON_API = 'https://cloudflareinsights.com';
 
 export function contentSecurityPolicy(isDev: boolean): string {
   const directives = [
     "default-src 'self'",
     // 'unsafe-eval' only for next dev (React Refresh); never in a production build.
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} ${CF_BEACON_SCRIPT}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${SANITY_CDN}`,
     "font-src 'self'",
-    `connect-src 'self'${isDev ? ' ws:' : ''}`,
+    `connect-src 'self' ${CF_BEACON_API}${isDev ? ' ws:' : ''}`,
     // PDF attachments and other files are linked from the Sanity CDN, never embedded.
     "frame-src 'none'",
     "object-src 'none'",

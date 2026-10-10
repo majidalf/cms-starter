@@ -8,6 +8,7 @@
  * studio/schemaTypes/objects/localeSlug.ts, which stops pages from taking these slugs.
  */
 export const routes = {
+  about: '/about',
   leadership: '/about/leadership',
   services: '/services',
   industries: '/industries',
